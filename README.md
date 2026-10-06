@@ -1,61 +1,45 @@
-<div dir="rtl">
+# C# Programming in the .NET Framework — Day 1
 
-# C# Programming in the .NET Framework — יום 1
+Course materials for the first day of the course: **object-oriented programming, collections and exception handling**, in C# 13 / .NET 10.
 
-חומרי הלימוד ליום הראשון של הקורס: **תכנות מונחה-עצמים, אוספים וטיפול בחריגות**, ב-C# 13 / .NET 10.
+## Before Day 1
 
-## לפני היום הראשון
-
-1. התקינו את הכלים לפי [`00-Setup/INSTALL.md`](00-Setup/INSTALL.md): ‏.NET 10 SDK, ‏Visual Studio 2022 או VS Code עם התוסף C# Dev Kit, ו-Git.
-2. הורידו את המאגר:
-
-<div dir="ltr">
+1. Install the tools following [`00-Setup/INSTALL.md`](00-Setup/INSTALL.md): .NET 10 SDK, Visual Studio 2022 or VS Code with the C# Dev Kit extension, and Git.
+2. Clone the repository:
 
 ```bash
 git clone https://github.com/Lior1234yaa/csharp-course-day1.git
 ```
 
-</div>
-
-3. בדקו שהסביבה מוכנה:
-
-<div dir="ltr">
+3. Check that your environment is ready:
 
 ```bash
 cd csharp-course-day1/00-Setup/VerifySetup
 dotnet run
 ```
 
-</div>
+If `dotnet` is not recognized in the VS Code terminal after installation: close VS Code completely (`File` → `Exit`) and open it again.
 
-אם `dotnet` לא מזוהה בטרמינל של VS Code אחרי ההתקנה: סגרו את VS Code לגמרי (`File` → `Exit`) ופתחו מחדש.
-
-## מה יש במאגר
-
-<div dir="ltr">
+## What's in the repository
 
 ```text
 00-Setup/
-  INSTALL.md                     מדריך התקנה
-  CHEATSHEET.md                  דף עזר מהיר ל-C#
-  VerifySetup/                   בדיקת סביבה (dotnet run)
+  INSTALL.md                     Installation guide
+  CHEATSHEET.md                  Quick C# reference sheet
+  VerifySetup/                   Environment check (dotnet run)
 Day1-OOP-Collections-Exceptions/
-  README.md                      סדר היום, מטרות, קישורים
-  Notes/                         חומרי הלימוד, קובץ לכל מודול
-  Slides/Day1.pptx               המצגת
-  Demos/                         הדמואים מהשיעור (dotnet run)
-  Exercises/README.md            14 תרגילים קצרים
-  Labs/LabN-<Name>/              מעבדה: README.md (הוראות) + Starter/ (פרויקט התחלה)
+  README.md                      Schedule, goals, links
+  Notes/                         Study materials, one file per module
+  Slides/Day1.pptx               The slide deck
+  Demos/                         The demos from class (dotnet run)
+  Exercises/README.md            14 short exercises
+  Labs/LabN-<Name>/              Lab: README.md (instructions) + Starter/ (starter project)
 ```
 
-</div>
+Start with [`Day1-OOP-Collections-Exceptions/README.md`](Day1-OOP-Collections-Exceptions/README.md).
 
-מתחילים מ-[`Day1-OOP-Collections-Exceptions/README.md`](Day1-OOP-Collections-Exceptions/README.md).
+## How to work
 
-## איך עובדים
-
-- **Notes** הם "הספר" של הקורס. קראו אותם אחרי כל מודול, ובמיוחד את סעיף "טעויות נפוצות" בסוף כל קובץ.
-- **Demos** הם הקוד שמוצג בשיעור. אפשר להריץ ולשנות: `cd Demos/<Project>` ואז `dotnet run`.
-- **Labs**: העתיקו את תיקיית `Starter` לתיקייה משלכם ועבדו על העותק. הוראות מפורטות ב-README של כל מעבדה.
-
-</div>
+- **Notes** are the course "textbook". Read them after each module, especially the "Common mistakes" section at the end of each file.
+- **Demos** are the code shown in class. You can run and modify them: `cd Demos/<Project>` and then `dotnet run`.
+- **Labs**: copy the `Starter` folder to a folder of your own and work on the copy. Detailed instructions are in each lab's README.

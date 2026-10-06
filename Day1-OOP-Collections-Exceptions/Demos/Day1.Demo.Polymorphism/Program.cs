@@ -1,14 +1,14 @@
 // =====================================================================
-// Day1.Demo.Polymorphism — ירושה, פולימורפיזם, ממשקים והפשטה
-// מה הדמו מראה:
-//   * מחלקה אבסטרקטית Shape עם מתודה אבסטרקטית ומתודה virtual
+// Day1.Demo.Polymorphism — inheritance, polymorphism, interfaces and abstraction
+// What the demo shows:
+//   * an abstract class Shape with an abstract method and a virtual method
 //   * override / base / sealed
-//   * ממשקים: IDescribable עם default member, מימוש מרובה
-//   * פולימורפיזם: List<Shape> — כל אובייקט מתנהג לפי הטיפוס האמיתי שלו
+//   * interfaces: IDescribable with a default member, multiple implementations
+//   * polymorphism: List<Shape> — each object behaves according to its actual type
 //   * is / as / pattern matching (type pattern, property pattern, switch)
-//   * Equals/GetHashCode/ToString ב-class
-//   * composition over inheritance (Logger מוזרק במקום ירושה)
-// הרצה:  dotnet run
+//   * Equals/GetHashCode/ToString in a class
+//   * composition over inheritance (a Logger is injected instead of inherited)
+// Run:  dotnet run
 // =====================================================================
 
 Console.WriteLine("=== 1. Polymorphism via an abstract base class ===");
@@ -27,7 +27,7 @@ Console.WriteLine("\n=== 2. Interfaces and default members ===");
 IDescribable[] things = [new Circle(1), new Invoice(3, 99.9m)];
 foreach (var t in things) Console.WriteLine(t.Describe());
 IDescribable inv = new Invoice(1, 10m);
-Console.WriteLine(inv.DescribeLoud());  // default member — נגיש רק דרך טיפוס הממשק
+Console.WriteLine(inv.DescribeLoud());  // default member — accessible only through the interface type
 
 Console.WriteLine("\n=== 3. is / as / pattern matching ===");
 object[] mixed = [new Circle(2), new Rectangle(1, 1), "hello", 42, null!];
@@ -48,7 +48,7 @@ foreach (var o in mixed)
 }
 
 if (shapes[0] is Circle first) Console.WriteLine($"shapes[0] is a Circle with radius {first.Radius}");
-var maybeRect = shapes[0] as Rectangle;   // null אם ההמרה לא מתאימה — לא זורק חריגה
+var maybeRect = shapes[0] as Rectangle;   // null if the conversion doesn't fit — doesn't throw an exception
 Console.WriteLine($"shapes[0] as Rectangle → {(maybeRect is null ? "null" : "rect")}");
 
 Console.WriteLine("\n=== 4. Equals / GetHashCode ===");
@@ -68,15 +68,15 @@ quiet.Place("ORD-2");
 interface IDescribable
 {
     string Describe();
-    // default implementation — מי שמממש את הממשק מקבל אותה "בחינם"
+    // default implementation — whoever implements the interface gets it "for free"
     string DescribeLoud() => Describe().ToUpperInvariant() + "!";
 }
 
 abstract class Shape : IDescribable
 {
     public abstract string Name { get; }
-    public abstract double Area();                 // חייבים לממש ביורשים
-    public virtual string Describe() => $"I am a {Name}";  // אפשר לדרוס
+    public abstract double Area();                 // must be implemented in derived classes
+    public virtual string Describe() => $"I am a {Name}";  // can be overridden
 }
 
 class Circle(double radius) : Shape
@@ -95,7 +95,7 @@ class Rectangle(double width, double height) : Shape
     public override double Area() => Width * Height;
 }
 
-// sealed — אי אפשר לרשת ממנה הלאה
+// sealed — no further inheritance from it is allowed
 sealed class Square(double side) : Rectangle(side, side)
 {
     public override string Name => "Square";
@@ -122,7 +122,7 @@ interface ILogger { void Log(string message); }
 class ConsoleLogger : ILogger { public void Log(string message) => Console.WriteLine($"[LOG] {message}"); }
 class NullLogger : ILogger { public void Log(string message) { } }
 
-// OrderService "יש לו" logger (has-a) במקום "הוא" logger (is-a)
+// OrderService "has a" logger (has-a) instead of "is a" logger (is-a)
 class OrderService(ILogger logger)
 {
     public void Place(string orderId)

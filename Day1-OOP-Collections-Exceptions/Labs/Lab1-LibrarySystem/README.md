@@ -1,71 +1,63 @@
-<div dir="rtl">
+# Lab 1 — Library System (45 minutes)
 
-# Lab 1 — מערכת ספרייה (45 דקות)
+## Goal
 
-## מטרה
+Build a small, well-organized object model: a `Book` class with properties and a constructor that validates its input, and a `Library` class that manages a `List<Book>` — adding, searching, borrowing and returning. By the end of the lab you should be able to explain why an object's state should change only through its own methods.
 
-לבנות מודל אובייקטים קטן ומסודר: מחלקת `Book` עם properties ובנאי שמוודא קלט, ומחלקת `Library` שמנהלת `List<Book>` — הוספה, חיפוש, השאלה והחזרה. בסוף הלאב תדעו להסביר למה המצב של אובייקט צריך להשתנות רק דרך מתודות שלו.
+## What you need to know first
 
-## מה צריך לדעת לפני
+- Module 01 (C# warm-up) and Module 02 (classes, objects, properties, constructors).
+- Module 04 (List<T>) helps, but you can get by with `foreach` alone.
 
-- מודול 01 (חימום C#) ומודול 02 (מחלקות, אובייקטים, properties, בנאים).
-- מודול 04 עוזר (List<T>), אבל אפשר להסתדר עם `foreach` בלבד.
-
-## התחלה
-
-<div dir="ltr">
+## Getting started
 
 ```bash
 cd Labs/Lab1-LibrarySystem/Starter
 dotnet run
 ```
 
-</div>
+The project already compiles, but every method throws `NotImplementedException`. Work through the `// TODO` comments in order.
 
-הפרויקט מתקמפל כבר עכשיו, אבל כל מתודה זורקת `NotImplementedException`. עברו על ה-`// TODO` לפי הסדר.
+## Steps
 
-## שלבים
+### Step 1 — `Book` (15 min)
 
-### שלב 1 — `Book` (15 דק')
+1. **TODO 1** — Add the properties: `Isbn` (read-only), `Title`, `Author`, `Year`, `IsBorrowed` (`private set`), and a computed `Age`.
+2. **TODO 2** — Write the constructor. Make sure the strings are not empty (`ArgumentException.ThrowIfNullOrWhiteSpace`) and that the year makes sense (`ArgumentOutOfRangeException`).
+3. **TODO 3** — `Borrow()` and `Return()`. Think: what should happen when someone tries to borrow a book that is already borrowed? (Hint: that breaks a rule — throw `InvalidOperationException`.)
+4. **TODO 4** — `ToString()` in the format `[isbn] Title / Author (Year) — available|BORROWED`.
 
-1. **TODO 1** — הוסיפו את ה-properties: `Isbn` (קריאה בלבד), `Title`, `Author`, `Year`, `IsBorrowed` (`private set`), ו-`Age` מחושב.
-2. **TODO 2** — כתבו את הבנאי. ודאו שהמחרוזות אינן ריקות (`ArgumentException.ThrowIfNullOrWhiteSpace`) ושהשנה הגיונית (`ArgumentOutOfRangeException`).
-3. **TODO 3** — `Borrow()` ו-`Return()`. חשבו: מה צריך לקרות כשמנסים להשאיל ספר שכבר מושאל? (רמז: זו הפרת כלל — זרקו `InvalidOperationException`.)
-4. **TODO 4** — `ToString()` בפורמט `[isbn] Title / Author (Year) — available|BORROWED`.
+### Step 2 — `Library` (20 min)
 
-### שלב 2 — `Library` (20 דק')
+5. **TODO 5** — Expose the books as `IReadOnlyList<Book>`. Why not `List<Book>`?
+6. **TODO 6** — `AddBook`, which prevents duplicate ISBNs.
+7. **TODO 7–9** — Searches: by part of the title, by author, by ISBN (returns `null` if there is no match).
+8. **TODO 10** — `Borrow(isbn)` / `Return(isbn)` — return `false` if the book does not exist; otherwise call the book's own method.
+9. **TODO 11** — `GetAvailable()`, sorted by title.
 
-5. **TODO 5** — חשפו את הספרים כ-`IReadOnlyList<Book>`. למה לא `List<Book>`?
-6. **TODO 6** — `AddBook` שמונע ISBN כפול.
-7. **TODO 7–9** — חיפושים: לפי חלק מהכותרת, לפי מחבר, לפי ISBN (מחזיר `null` אם אין).
-8. **TODO 10** — `Borrow(isbn)` / `Return(isbn)` — מחזירים `false` אם הספר לא קיים, אחרת מפעילים את המתודה של הספר.
-9. **TODO 11** — `GetAvailable()` ממוין לפי כותרת.
+### Step 3 — Wiring it up (10 min)
 
-### שלב 3 — חיבור (10 דק')
+10. **TODO 12** — Uncomment the lines in `Seed` and run the program. Try every menu option, including borrowing the same book twice.
 
-10. **TODO 12** — הסירו את ההערות ב-`Seed` והריצו. נסו את כל אפשרויות התפריט, כולל השאלה כפולה.
+## Acceptance criteria
 
-## קריטריוני קבלה
+- [ ] `dotnet build` passes with no errors and no warnings.
+- [ ] Creating `new Book("", "x", "y", 2000)` throws `ArgumentException`.
+- [ ] Creating a book with the year 3000 throws `ArgumentOutOfRangeException`.
+- [ ] Borrowing a book twice prints `Error: ... already borrowed` and does not crash the program.
+- [ ] `SearchByTitle("CLEAN")` finds "Clean Code" (case-insensitive).
+- [ ] `GetAvailable()` does not include borrowed books, and is sorted by title.
+- [ ] `Books` is declared as `IReadOnlyList<Book>`, and you cannot call `library.Books.Add(...)`.
 
-- [ ] `dotnet build` עובר ללא שגיאות ואזהרות.
-- [ ] יצירת `new Book("", "x", "y", 2000)` זורקת `ArgumentException`.
-- [ ] יצירת ספר עם שנה 3000 זורקת `ArgumentOutOfRangeException`.
-- [ ] השאלה של ספר פעמיים מדפיסה `Error: ... already borrowed` ולא מפילה את התוכנית.
-- [ ] `SearchByTitle("CLEAN")` מוצא את "Clean Code" (לא תלוי רישיות).
-- [ ] `GetAvailable()` לא כולל ספרים מושאלים, וממוין לפי כותרת.
-- [ ] `Books` מוגדר כ-`IReadOnlyList<Book>` ואי אפשר לקרוא `library.Books.Add(...)`.
+## Bonus
 
-## בונוס
+- `BorrowedCount` — how many books are currently borrowed.
+- `Oldest` — the oldest book (hint: `MinBy`).
+- Add a `DueDate` (return date) that `Borrow` sets to 14 days from now, and an `IsOverdue` property.
 
-- `BorrowedCount` — כמה ספרים מושאלים כרגע.
-- `Oldest` — הספר הישן ביותר (רמז: `MinBy`).
-- הוסיפו `DueDate` (תאריך החזרה) שנקבע ב-`Borrow` ל-14 יום קדימה, ו-`IsOverdue`.
+## Hints
 
-## רמזים
-
-- `string.Contains(text, StringComparison.OrdinalIgnoreCase)` — חיפוש לא תלוי רישיות.
-- `_books.FirstOrDefault(b => b.Isbn == isbn)` מחזיר `null` כשאין התאמה.
-- `List<T>` מממש `IReadOnlyList<T>`, אז `public IReadOnlyList<Book> Books => _books;` עובד.
-- `DateTime.Now.Year` — השנה הנוכחית.
-
-</div>
+- `string.Contains(text, StringComparison.OrdinalIgnoreCase)` — case-insensitive search.
+- `_books.FirstOrDefault(b => b.Isbn == isbn)` returns `null` when there is no match.
+- `List<T>` implements `IReadOnlyList<T>`, so `public IReadOnlyList<Book> Books => _books;` works.
+- `DateTime.Now.Year` — the current year.

@@ -1,38 +1,30 @@
-<div dir="rtl">
+# Module 07 — Clean, Maintainable and Reusable Code
 
-# מודול 07 — קוד נקי, תחזוקתי ורב-שימושי
+Code is read far more often than it is written. Every line you write today, someone — probably you, six months from now — will have to understand, change and fix. "Clean code" is not about beauty but about **cost**: how long it takes to understand what the code does, and how safe it is to change it. In this module we gather simple, practical principles, see them in before/after examples, and connect them to what we learned today: interfaces, generics and collections are the tools that make code reusable.
 
-קוד נקרא הרבה יותר פעמים ממה שהוא נכתב. כל שורה שתכתבו היום, מישהו — כנראה אתם בעוד חצי שנה — יצטרך להבין, לשנות ולתקן. "קוד נקי" הוא לא עניין של יופי אלא של **עלות**: כמה זמן לוקח להבין מה הקוד עושה, וכמה בטוח לשנות אותו. במודול הזה נאסוף עקרונות פשוטים ומעשיים, נראה אותם על דוגמאות before/after, ונחבר אותם למה שלמדנו היום: ממשקים, גנריקה ואוספים הם הכלים שהופכים קוד לרב-שימושי.
+## Naming
 
-## שמות
+A name is the first and most important piece of documentation. A good name saves a comment.
 
-השם הוא התיעוד הראשון והחשוב ביותר. שם טוב חוסך הערה.
-
-- **תארו כוונה**, לא מימוש: `elapsedDays` ולא `d`; `IsEligibleForDiscount` ולא `Check`.
-- **מוסכמות C#**: `PascalCase` למחלקות, מתודות, properties; `camelCase` לפרמטרים ומשתנים מקומיים; `_camelCase` לשדות פרטיים; `I` לממשקים; מתודות שמחזירות `bool` בצורת שאלה (`IsEmpty`, `HasItems`, `CanWithdraw`); מתודות async עם סיומת `Async`.
-- **בלי קיצורים** שלא כולם מכירים (`cust`, `mgr`) ובלי הונגרית (`strName`, `iCount`).
-- **אורך לפי טווח**: `i` בלולאה של 3 שורות בסדר; `i` כשדה במחלקה — לא.
-
-<div dir="ltr">
+- **Describe intent**, not implementation: `elapsedDays`, not `d`; `IsEligibleForDiscount`, not `Check`.
+- **C# conventions**: `PascalCase` for classes, methods and properties; `camelCase` for parameters and local variables; `_camelCase` for private fields; an `I` prefix for interfaces; methods returning `bool` phrased as a question (`IsEmpty`, `HasItems`, `CanWithdraw`); async methods with an `Async` suffix.
+- **No abbreviations** that not everyone knows (`cust`, `mgr`) and no Hungarian notation (`strName`, `iCount`).
+- **Length according to scope**: `i` in a 3-line loop is fine; `i` as a class field is not.
 
 ```csharp
-// לפני
+// Before
 static double c(double a, int t, bool m) { ... }
 
-// אחרי
+// After
 static decimal CalculatePriceWithVat(decimal basePrice, CustomerType customer, bool isMember) { ... }
 ```
 
-</div>
+## Small methods that do one thing
 
-## מתודות קטנות שעושות דבר אחד
-
-מתודה צריכה להיקרא ולהיות מובנת בלי לגלול. כלל אצבע: עד ~20 שורות, רמת הזחה אחת או שתיים, ושם שמתאר בדיוק מה היא עושה. אם אתם צריכים "ו" בשם (`ValidateAndSave`) — אלה שתי מתודות. חילוץ מתודה (Extract Method, `Ctrl+R, Ctrl+M` ב-Visual Studio) הוא ה-refactoring הנפוץ ביותר.
-
-<div dir="ltr">
+A method should be readable and understandable without scrolling. Rule of thumb: up to ~20 lines, one or two levels of indentation, and a name that describes exactly what it does. If you need "And" in the name (`ValidateAndSave`) — those are two methods. Extract Method (`Ctrl+R, Ctrl+M` in Visual Studio) is the most common refactoring.
 
 ```csharp
-// לפני: הכל במקום אחד
+// Before: everything in one place
 public void ProcessOrder(Order order)
 {
     if (order.Lines.Count == 0) throw new ArgumentException("empty");
@@ -43,7 +35,7 @@ public void ProcessOrder(Order order)
     _mailer.Send(order.Customer.Email, $"Order {order.Id}: {total:N2}");
 }
 
-// אחרי: שלוש שאלות, שלוש תשובות
+// After: three questions, three answers
 public void ProcessOrder(Order order)
 {
     EnsureNotEmpty(order);
@@ -53,83 +45,67 @@ public void ProcessOrder(Order order)
 }
 ```
 
-</div>
+## Magic numbers → constants and enums
 
-## מספרי קסם → קבועים ו-enums
-
-`if (status == 2)` או `price * 1.18` לא אומרים כלום לקורא, וכשהמע"מ ישתנה תצטרכו לחפש `1.18` בכל הפרויקט (ולפספס את ה-`1.18m` בקובץ אחר).
-
-<div dir="ltr">
+`if (status == 2)` or `price * 1.18` mean nothing to the reader, and when the VAT rate changes you'll have to search for `1.18` across the whole project (and miss the `1.18m` in another file).
 
 ```csharp
 const decimal VatRate = 1.18m;
 const int RegularHoursPerMonth = 160;
-static readonly TimeSpan LoanPeriod = TimeSpan.FromDays(14);     // readonly לטיפוסים לא-קבועים
+static readonly TimeSpan LoanPeriod = TimeSpan.FromDays(14);     // readonly for types that can't be const
 
 enum OrderStatus { Pending, Paid, Shipped, Cancelled }
 if (order.Status == OrderStatus.Shipped) { }
 ```
 
-</div>
+`const` for values known at compile time (numbers, strings); `static readonly` for objects. `enum` for a closed set of options — the compiler checks it, the IDE autocompletes it, and a `switch` can warn about a missing case.
 
-`const` לערכים שידועים בקומפילציה (מספרים, מחרוזות); `static readonly` לאובייקטים. `enum` לקבוצה סגורה של אפשרויות — המהדר בודק, ה-IDE משלים, ו-`switch` יכול להזהיר על מקרה חסר.
+## DRY — Don't Repeat Yourself
 
-## DRY — אל תחזרו על עצמכם
+When the same piece of code appears twice, a bug gets fixed in only one place. Extract a method, a base class, or — usually best — a method that takes a delegate (Module 05). But beware of the other extreme: two pieces of code that look similar but change for different reasons should not be merged. DRY is about **knowledge**, not text.
 
-כשאותו קטע קוד מופיע פעמיים, באג יתוקן רק במקום אחד. חילוץ מתודה, מחלקת בסיס, או — לרוב הכי טוב — מתודה שמקבלת delegate (מודול 05). אבל היזהרו מהקיצוניות השנייה: שני קטעים שנראים דומים אבל משתנים מסיבות שונות לא צריכים להתאחד. DRY הוא על **ידע**, לא על טקסט.
+## SOLID in brief
 
-## SOLID בקצרה
+Five principles of object-oriented design. You don't need to memorize them — you need to recognize when they're being violated:
 
-חמישה עקרונות לעיצוב מונחה-עצמים. לא צריך לשנן — צריך לזהות מתי מפרים אותם:
+- **S — Single Responsibility**: a class has one reason to change. `Order` shouldn't know how to send email; `OrderService` shouldn't know how to format HTML. Warning sign: a class with "Manager"/"Helper" in its name and 40 methods.
+- **O — Open/Closed**: open for extension, closed for modification. Adding a new employee type = a new class, not another `case` in a `switch` (Module 03). Polymorphism and interfaces.
+- **L — Liskov Substitution**: a derived class must behave like its base class from the point of view of whoever uses it. If `Square : Rectangle` breaks `SetWidth` — the inheritance is wrong.
+- **I — Interface Segregation**: small, focused interfaces. `IReadOnlyRepository` and `IWritableRepository` instead of a single 12-method interface where most implementers throw `NotSupportedException` from half of them.
+- **D — Dependency Inversion**: depend on abstractions, not implementations. `OrderService(ILogger logger)`, not `new FileLogger()` inside the class. This is what lets you swap implementations and test with a fake. On Day 4 we'll see Dependency Injection, which does this automatically.
 
-- **S — Single Responsibility**: למחלקה סיבה אחת להשתנות. `Order` לא צריך לדעת לשלוח מייל; `OrderService` לא צריך לדעת לפרמט HTML. סימן אזהרה: מחלקה עם "Manager"/"Helper" בשם ו-40 מתודות.
-- **O — Open/Closed**: פתוח להרחבה, סגור לשינוי. הוספת סוג עובד חדש = מחלקה חדשה, לא `case` נוסף ב-`switch` (מודול 03). פולימורפיזם וממשקים.
-- **L — Liskov Substitution**: יורש חייב להתנהג כמו האב מבחינת מי שמשתמש בו. אם `Square : Rectangle` שובר `SetWidth` — הירושה שגויה.
-- **I — Interface Segregation**: ממשקים קטנים וממוקדים. `IReadOnlyRepository` ו-`IWritableRepository` במקום ממשק אחד עם 12 מתודות שרוב המממשים זורקים `NotSupportedException` מחצי מהן.
-- **D — Dependency Inversion**: תלות בהפשטות, לא במימושים. `OrderService(ILogger logger)` ולא `new FileLogger()` בתוך המחלקה. זה מה שמאפשר להחליף מימוש ולבדוק עם fake. ביום 2 נראה Dependency Injection שעושה את זה אוטומטית.
+## Comments
 
-## הערות
+A good comment explains **why**, not **what**. `i++; // increments i` is noise; `// the vendor returns 429 above 10 requests per second, hence the delay` is gold. If you need a comment to explain what the code does — improve the code (a name, an extracted method). `///` comments (XML doc) on a public API show up in IntelliSense and are worth it. Delete commented-out code — that's what git is for.
 
-הערה טובה מסבירה **למה**, לא **מה**. `i++; // מגדיל את i` היא רעש; `// הספק מחזיר 429 מעל 10 בקשות בשנייה, לכן ההשהיה` היא זהב. אם צריך הערה כדי להסביר מה הקוד עושה — שפרו את הקוד (שם, חילוץ מתודה). הערות `///` (XML doc) על API ציבורי מופיעות ב-IntelliSense ושוות את זה. מחקו קוד בהערה — יש git.
+## Code style: `.editorconfig` and `dotnet format`
 
-## סגנון קוד: `.editorconfig` ו-`dotnet format`
-
-צוות צריך סגנון אחד, וכלי שאוכף אותו — לא ויכוחים ב-code review על רווחים. קובץ `.editorconfig` בשורש הפרויקט מגדיר את הכללים (הזחות, מיקום סוגריים, `var`, סדר `using`, ואפילו כללי ניתוח סטטי), ו-Visual Studio, VS Code ו-Rider מכבדים אותו אוטומטית.
-
-<div dir="ltr">
+A team needs one style, and a tool that enforces it — not arguments about whitespace in code review. An `.editorconfig` file at the project root defines the rules (indentation, brace placement, `var`, `using` ordering, and even static analysis rules), and Visual Studio, VS Code and Rider honor it automatically.
 
 ```bash
-dotnet new editorconfig       # יוצר קובץ עם ברירות המחדל של .NET
-dotnet format                 # מעצב את כל הפרויקט לפי הכללים
-dotnet format --verify-no-changes   # ב-CI: נכשל אם משהו לא מעוצב
+dotnet new editorconfig       # creates a file with the .NET defaults
+dotnet format                 # formats the whole project according to the rules
+dotnet format --verify-no-changes   # in CI: fails if anything isn't formatted
 ```
 
-</div>
-
-דוגמה לכמה שורות מה-`.editorconfig`:
-
-<div dir="ltr">
+An example of a few lines from an `.editorconfig`:
 
 ```text
 [*.cs]
 indent_size = 4
 csharp_style_var_when_type_is_apparent = true:suggestion
 csharp_prefer_braces = true:warning
-dotnet_diagnostic.CA2200.severity = error     # throw ex; הופך לשגיאה
+dotnet_diagnostic.CA2200.severity = error     # throw ex; becomes an error
 ```
 
-</div>
+Also add `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` to the `.csproj` in new projects — warnings only pile up if you let them.
 
-הוסיפו גם `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` ב-`.csproj` בפרויקטים חדשים — אזהרות מצטברות רק אם מרשים להן.
+## Refactoring — before and after
 
-## Refactoring — לפני ואחרי
-
-שכתוב (refactoring) הוא שינוי **מבנה** הקוד בלי לשנות **התנהגות**. עושים אותו בצעדים קטנים, עם בדיקות (או לפחות הרצה) אחרי כל צעד.
-
-<div dir="ltr">
+Refactoring is changing the **structure** of code without changing its **behavior**. You do it in small steps, with tests (or at least a run) after every step.
 
 ```csharp
-// לפני
+// Before
 static double c(double a, int t, bool m)
 {
     double r = 0;
@@ -140,7 +116,7 @@ static double c(double a, int t, bool m)
     return r * 1.18;
 }
 
-// אחרי
+// After
 enum CustomerType { Regular, Silver, Gold }
 const decimal VatRate = 1.18m, MemberDiscount = 5m, SilverFactor = 0.9m, GoldFactor = 0.8m;
 
@@ -160,25 +136,21 @@ static decimal ApplyCustomerDiscount(decimal price, CustomerType customer) => cu
 };
 ```
 
-</div>
+What changed: names, an `enum` instead of 1/2, constants, the duplicated `if (m) r -= 5` was pulled out, a `switch` expression instead of an `if` chain, `decimal` for money. The behavior is identical — Exercise 14 checks this.
 
-מה השתנה: שמות, `enum` במקום 1/2, קבועים, הכפילות `if (m) r -= 5` הוצאה החוצה, `switch` expression במקום שרשרת `if`, `decimal` לכסף. ההתנהגות זהה — תרגיל 14 בודק את זה.
+More everyday refactorings: Extract Method, Rename (`F2` / `Ctrl+R, Ctrl+R`), Inline Variable, Replace Conditional with Polymorphism, Introduce Parameter Object (one record instead of 6 parameters), Guard Clauses instead of nested `if`s.
 
-עוד refactorings יומיומיים: Extract Method, Rename (`F2` / `Ctrl+R, Ctrl+R`), Inline Variable, Replace Conditional with Polymorphism, Introduce Parameter Object (במקום 6 פרמטרים — record אחד), Guard Clauses במקום `if` מקונן.
+## Reusable code: interfaces and generics
 
-## קוד רב-שימושי: ממשקים וגנריקה
+The tools we learned today are exactly what makes code reusable:
 
-הכלים שלמדנו היום הם בדיוק מה שהופך קוד ל-reusable:
-
-- **ממשק** מפריד בין "מה" ל-"איך": `Payroll` שעובד עם `IPayable` ישרת גם עובדים, קבלנים ובעתיד רובוטים.
-- **גנריקה** מפרידה בין אלגוריתם לטיפוס: `Repository<T>` אחד לכל הישויות; `Find(Func<T, bool>)` אחד לכל התנאים.
-- **delegates** מפרידים בין מסגרת לפרטים: `Retry(Action op, int times)` עוטף כל פעולה.
-- **records + פונקציות טהורות** קלים להרכבה ולבדיקה.
-
-<div dir="ltr">
+- An **interface** separates "what" from "how": a `Payroll` that works with `IPayable` will serve employees, contractors and, in the future, robots.
+- **Generics** separate the algorithm from the type: one `Repository<T>` for all entities; one `Find(Func<T, bool>)` for all conditions.
+- **Delegates** separate the framework from the details: `Retry(Action op, int times)` wraps any operation.
+- **Records + pure functions** are easy to compose and test.
 
 ```csharp
-static T Retry<T>(Func<T> operation, int attempts = 3)       // רב-שימושי: כל פעולה, כל טיפוס
+static T Retry<T>(Func<T> operation, int attempts = 3)       // reusable: any operation, any type
 {
     for (int i = 1; ; i++)
     {
@@ -190,27 +162,25 @@ static T Retry<T>(Func<T> operation, int attempts = 3)       // רב-שימוש�
 var data = Retry(() => client.GetString(url));
 ```
 
-</div>
+## Common mistakes
 
-## טעויות נפוצות
+- **Premature optimization** — "clever", unreadable code for performance nobody measured.
+- **Premature abstraction** — an interface for every class, generics for something with a single use. The rule: abstract after the second case, not before the first.
+- **"God" classes** that know everything (`AppManager`).
+- **Boolean parameters** — `Save(order, true, false)`: what does that mean? Use an enum or two well-named methods.
+- **Comments instead of names** — `int d; // days since last login` → `int daysSinceLastLogin`.
+- **Dead code** and `// TODO`s from two years ago — delete them. git remembers.
+- **Breaking the project's style** because "that's how I'm used to it" — consistency matters more than personal preference.
 
-- **אופטימיזציה מוקדמת** — קוד "חכם" ולא קריא בשביל ביצועים שאף אחד לא מדד.
-- **הפשטה מוקדמת** — ממשק לכל מחלקה, גנריקה לדבר שיש לו שימוש אחד. הכלל: אבסטרקציה אחרי המקרה השני, לא לפני הראשון.
-- **מחלקות "God"** שיודעות הכל (`AppManager`).
-- **פרמטרים בוליאניים** — `Save(order, true, false)`: מה זה אומר? enum או שני שמות.
-- **הערות במקום שמות** — `int d; // days since last login` → `int daysSinceLastLogin`.
-- **קוד מת** ו-`// TODO` מלפני שנתיים — מחקו. git זוכר.
-- **שבירת הסגנון של הפרויקט** כי "ככה אני רגיל" — עקביות חשובה מהעדפה אישית.
+## Summary
 
-## לסיכום
+- Names that describe intent; small methods; constants and enums instead of magic numbers; DRY is about knowledge.
+- SOLID: one responsibility, extension without modification, derived classes that behave like their base, small interfaces, dependency on abstractions.
+- Comments for "why"; `.editorconfig` + `dotnet format` for a uniform style.
+- Refactor in small steps and test after every step.
+- Interfaces, generics and delegates are the tools for code you can reuse.
 
-- שמות שמתארים כוונה; מתודות קטנות; קבועים ו-enums במקום מספרי קסם; DRY על ידע.
-- SOLID: אחריות אחת, הרחבה בלי שינוי, יורש שמתנהג כמו האב, ממשקים קטנים, תלות בהפשטות.
-- הערות ל-"למה"; `.editorconfig` + `dotnet format` לסגנון אחיד.
-- refactoring בצעדים קטנים ובדיקה אחרי כל צעד.
-- ממשקים, גנריקה ו-delegates הם הכלים לקוד שאפשר להשתמש בו שוב.
-
-## קריאה נוספת
+## Further reading
 
 - [C# identifier naming rules and conventions](https://learn.microsoft.com/dotnet/csharp/fundamentals/coding-style/identifier-names)
 - [C# coding conventions](https://learn.microsoft.com/dotnet/csharp/fundamentals/coding-style/coding-conventions)
@@ -219,5 +189,3 @@ var data = Retry(() => client.GetString(url));
 - [Code analysis in .NET](https://learn.microsoft.com/dotnet/fundamentals/code-analysis/overview)
 - [Refactor code in Visual Studio](https://learn.microsoft.com/visualstudio/ide/refactoring-in-visual-studio)
 - [Architectural principles (SOLID, DRY)](https://learn.microsoft.com/dotnet/architecture/modern-web-apps-azure/architectural-principles)
-
-</div>

@@ -1,262 +1,218 @@
-<div dir="rtl">
+# What to Install — Setup Guide for the C# / .NET Course
 
-# מה צריך להתקין — מדריך התקנה לקורס C# / .NET
+This document takes you from zero to a working environment ready for all four days of the course. The guide is written **Windows-first** because on Day 3 we build WPF applications (which run only on Windows), but on Days 1, 2 and 4 you can also work on macOS or Linux — there are relevant notes along the way.
 
-מסמך זה מלווה אתכם מאפס עד סביבת עבודה מוכנה לכל ארבעת ימי הקורס. המדריך כתוב **Windows-first** כי ביום 3 נבנה אפליקציות WPF (שרצות רק ב-Windows), אבל בימים 1, 2 ו-4 אפשר לעבוד גם על macOS או Linux — יש הערות מתאימות לאורך הדרך.
+We recommend finishing the installation **before** Day 1 and running the verification program (section 10). If you're coming with a company laptop, check installation permissions and proxy settings in advance (see "Troubleshooting").
 
-מומלץ לסיים את ההתקנה **לפני** היום הראשון ולהריץ את תוכנית האימות (סעיף 10). מי שמגיע עם מחשב ארגוני — כדאי לבדוק מראש הרשאות התקנה ו-proxy (ראו "פתרון בעיות").
+## 1. Quick overview — what each day needs
 
-## 1. סקירה מהירה — מה נדרש לכל יום
-
-| יום | נושא | חובה | מומלץ |
+| Day | Topic | Required | Recommended |
 |-----|------|------|-------|
-| 1 | OOP, Collections, Exceptions | .NET 10 SDK, Visual Studio או VS Code, Git | Windows Terminal, LINQPad |
-| 2 | Multithreading, Async, REST + JSON | כל הנ"ל | Postman / REST Client, `curl` |
-| 3 | WPF (והשוואה ל-WinForms) | **Windows + Visual Studio** עם workload של .NET desktop | — |
-| 4 | פיתוח בעזרת AI וקוד תחזוקתי | חשבונות לכלי AI (Copilot / Claude / ChatGPT), Node.js LTS | Cursor |
+| 1 | OOP, Collections, Exceptions | .NET 10 SDK, Visual Studio or VS Code, Git | Windows Terminal, LINQPad |
+| 2 | Multithreading, Async, REST + JSON | All of the above | Postman / REST Client, `curl` |
+| 3 | WPF (and comparison with WinForms) | **Windows + Visual Studio** with the .NET desktop workload | — |
+| 4 | AI-assisted development, unit tests and maintainable code (DI) | Accounts for AI tools (Copilot / Claude / ChatGPT), Node.js LTS | Cursor |
 
 ## 2. .NET 10 SDK (LTS)
 
-ה-SDK הוא הבסיס לכל דבר: הקומפיילר, ה-CLI (`dotnet`) וה-Runtime.
+The SDK is the foundation for everything: the compiler, the CLI (`dotnet`) and the runtime.
 
-1. היכנסו ל-https://dotnet.microsoft.com/download
-2. בחרו **.NET 10** (גרסת LTS — תמיכה ארוכת טווח) והורידו את ה-**SDK** (לא רק Runtime!) למערכת ההפעלה שלכם.
-   - Windows: x64 Installer (ברוב המחשבים). אם יש לכם מחשב עם מעבד ARM — בחרו Arm64.
-   - macOS: בחרו Arm64 למחשבי Apple Silicon (M1 ואילך) או x64 למחשבי Intel.
-   - Linux: עדיף להתקין דרך מנהל החבילות של ההפצה (ההוראות בעמוד ההורדה, לפי הפצה).
-3. הריצו את ההתקנה, ואז **פתחו טרמינל חדש** (טרמינל שהיה פתוח לפני ההתקנה לא מכיר את ה-PATH המעודכן).
+1. Go to https://dotnet.microsoft.com/download
+2. Choose **.NET 10** (an LTS release — long-term support) and download the **SDK** (not just the Runtime!) for your operating system.
+   - Windows: x64 Installer (on most computers). If your computer has an ARM processor, choose Arm64.
+   - macOS: choose Arm64 for Apple Silicon computers (M1 and later) or x64 for Intel computers.
+   - Linux: preferably install through your distribution's package manager (instructions per distribution are on the download page).
+3. Run the installer, then **open a new terminal** (a terminal that was open before the installation doesn't know the updated PATH).
 
-אימות:
-
-<div dir="ltr">
+Verification:
 
 ```bash
 dotnet --version
 dotnet --info
 ```
 
-</div>
+The output of `dotnet --version` should start with `10.` (for example `10.0.100`). `dotnet --info` shows all installed SDKs and runtimes and the operating system — very useful for troubleshooting.
 
-הפלט של `dotnet --version` אמור להתחיל ב-`10.` (למשל `10.0.100`). `dotnet --info` מציג את כל ה-SDKs וה-Runtimes המותקנים ואת מערכת ההפעלה — שימושי מאוד לפתרון בעיות.
-
-הערה: אם אתם מתקינים Visual Studio (סעיף 3) עם workload של .NET, ה-SDK מותקן יחד איתו. עדיין כדאי להריץ `dotnet --version` ולוודא שהגרסה היא 10.
+Note: if you install Visual Studio (section 3) with the .NET workload, the SDK is installed along with it. It's still a good idea to run `dotnet --version` and make sure the version is 10.
 
 ## 3. Visual Studio Community (Windows)
 
-Visual Studio הוא ה-IDE המלא של מיקרוסופט ל-Windows, והוא **חובה ליום 3** בגלל מעצב ה-WPF (XAML Designer). גרסת Community חינמית לשימוש אישי, לימודי ולעסקים קטנים.
+Visual Studio is Microsoft's full IDE for Windows, and it is **required for Day 3** because of the WPF designer (XAML Designer). The Community edition is free for personal use, learning and small businesses.
 
-1. הורידו את המתקין מ-https://visualstudio.microsoft.com/ — בחרו **Community** ואת הגרסה **העדכנית ביותר** הזמינה (2022 או חדשה יותר; המדריך לא מתחייב למספר גרסה מדויק).
-2. הריצו את **Visual Studio Installer**. במסך "Workloads" סמנו:
-   - **.NET desktop development** — חובה. כולל WPF, Windows Forms, קונסולה, ואת ה-.NET SDK.
-   - **ASP.NET and web development** — אופציונלי. שימושי ליום 2 אם תרצו להרים Web API מקומי משלכם.
-3. בלשונית **Individual components** ודאו שמסומן ".NET 10 SDK" (בדרך כלל מסומן אוטומטית עם ה-workload). אם ה-SDK של 10 לא מופיע במתקין — התקינו אותו בנפרד מסעיף 2; Visual Studio מזהה SDK שהותקן בנפרד.
-4. לחצו Install. ההתקנה שוקלת כמה GB ולוקחת זמן — אל תשאירו אותה ליום הקורס.
+1. Download the installer from https://visualstudio.microsoft.com/ — choose **Community** and the **latest** version available (2022 or newer; this guide doesn't commit to an exact version number).
+2. Run the **Visual Studio Installer**. On the "Workloads" screen, select:
+   - **.NET desktop development** — required. Includes WPF, Windows Forms, console, and the .NET SDK.
+   - **ASP.NET and web development** — optional. Useful for Day 2 if you want to run a local Web API of your own.
+3. On the **Individual components** tab, make sure ".NET 10 SDK" is selected (it's usually selected automatically with the workload). If the 10 SDK doesn't appear in the installer, install it separately as in section 2; Visual Studio detects an SDK that was installed separately.
+4. Click Install. The installation takes several GB and some time — don't leave it for the day of the course.
 
-איך לבחור workloads? ה-workload הוא "חבילת יכולות" — אוסף של רכיבים שמותקנים יחד. אפשר תמיד להוסיף או להסיר workloads אחר כך דרך Visual Studio Installer -> Modify. אין צורך להתקין הכול; שני ה-workloads למעלה מספיקים לקורס.
+How do you choose workloads? A workload is a "capability bundle" — a set of components installed together. You can always add or remove workloads later via Visual Studio Installer -> Modify. There's no need to install everything; the two workloads above are enough for the course.
 
-איפה נמצא מה שנצטרך ביום 3:
-- **XAML Designer**: פתיחת קובץ `.xaml` בפרויקט WPF מציגה חלון מפוצל — תצוגה ויזואלית למעלה ו-XAML למטה (Split View). דרך View -> Toolbox גוררים פקדים.
-- **XAML Hot Reload**: פועל אוטומטית כשמריצים עם Debug (F5) — שינוי ב-XAML מתעדכן בחלון הרץ בלי להפעיל מחדש. אם זה לא עובד, בדקו ב-Tools -> Options -> Debugging -> Hot Reload.
-- **Live Visual Tree / Live Property Explorer**: Debug -> Windows — חקירת עץ הפקדים בזמן ריצה.
+Where to find what we'll need on Day 3:
+- **XAML Designer**: opening a `.xaml` file in a WPF project shows a split window — a visual view on top and XAML below (Split View). Use View -> Toolbox to drag controls.
+- **XAML Hot Reload**: works automatically when you run with Debug (F5) — changes to the XAML update in the running window without restarting. If it doesn't work, check Tools -> Options -> Debugging -> Hot Reload.
+- **Live Visual Tree / Live Property Explorer**: Debug -> Windows — explore the control tree at runtime.
 
-מי שעובד על macOS: Visual Studio for Mac הופסק, ואין תחליף ל-WPF Designer מחוץ ל-Windows. ליום 3 תצטרכו מכונת Windows (פיזית, VM כמו Parallels/VMware/VirtualBox, או Windows ב-Cloud). ימים 1, 2 ו-4 עובדים מצוין עם VS Code.
+If you work on macOS: Visual Studio for Mac has been discontinued, and there is no replacement for the WPF Designer outside Windows. For Day 3 you'll need a Windows machine (physical, a VM such as Parallels/VMware/VirtualBox, or Windows in the cloud). Days 1, 2 and 4 work great with VS Code.
 
-## 4. חלופה: Visual Studio Code
+## 4. Alternative: Visual Studio Code
 
-VS Code הוא עורך קל, חינמי וחוצה פלטפורמות (Windows / macOS / Linux). הוא **מספיק לימים 1, 2 ו-4** (פרויקטי קונסולה, בדיקות, HTTP, כלי AI). הוא **לא מספיק ליום 3** — אין בו מעצב WPF ויזואלי, ו-WPF עצמו רץ רק ב-Windows.
+VS Code is a lightweight, free, cross-platform editor (Windows / macOS / Linux). It is **enough for Days 1, 2 and 4** (console projects, tests, HTTP, AI tools). It is **not enough for Day 3** — it has no visual WPF designer, and WPF itself runs only on Windows.
 
-1. הורידו מ-https://code.visualstudio.com/
-2. התקינו את התוספים (Extensions, קיצור `Ctrl+Shift+X`):
-   - **C# Dev Kit** (של Microsoft) — חוויית פיתוח מלאה: Solution Explorer, הרצת בדיקות, תבניות פרויקט. מתקין אוטומטית גם את התוסף **C#** (שירות השפה, IntelliSense, debugging).
-   - **REST Client** (של Huachao Mao) — ליום 2, שליחת בקשות HTTP מתוך קובץ `.http` (ראו סעיף 6).
-3. פתחו תיקייה של פרויקט (File -> Open Folder), ולחצו F5 כדי להריץ עם debugger. בפעם הראשונה VS Code ישאל באיזה פרויקט להשתמש.
+1. Download from https://code.visualstudio.com/
+2. Install the extensions (Extensions, shortcut `Ctrl+Shift+X`):
+   - **C# Dev Kit** (by Microsoft) — a full development experience: Solution Explorer, running tests, project templates. It also automatically installs the **C#** extension (language service, IntelliSense, debugging).
+   - **REST Client** (by Huachao Mao) — for Day 2, sending HTTP requests from a `.http` file (see section 6).
+3. Open a project folder (File -> Open Folder) and press F5 to run with the debugger. The first time, VS Code will ask which project to use.
 
-טיפ: גם מי שמתקין Visual Studio — כדאי להתקין VS Code בנוסף. ביום 4 נעבוד עם GitHub Copilot ו-Claude Code, ושניהם משתלבים היטב ב-VS Code.
+Tip: even if you install Visual Studio, it's worth installing VS Code as well. On Day 4 we'll work with GitHub Copilot and Claude Code, and both integrate well with VS Code.
 
-## 5. Git ו-GitHub
+## 5. Git and GitHub
 
-1. **Git**: ב-Windows הורידו **Git for Windows** מ-https://git-scm.com/download/win והתקינו עם ברירות המחדל (כולל Git Bash). ב-macOS: `xcode-select --install` או דרך Homebrew (`brew install git`). ב-Linux: `sudo apt install git` (או המקבילה בהפצה שלכם).
-2. **חשבון GitHub**: פתחו חשבון חינמי ב-https://github.com/ — נצטרך אותו גם ל-GitHub Copilot ביום 4.
-3. הגדרה חד-פעמית של זהות:
-
-<div dir="ltr">
+1. **Git**: on Windows, download **Git for Windows** from https://git-scm.com/download/win and install with the defaults (including Git Bash). On macOS: `xcode-select --install` or via Homebrew (`brew install git`). On Linux: `sudo apt install git` (or your distribution's equivalent).
+2. **GitHub account**: create a free account at https://github.com/ — we'll also need it for GitHub Copilot on Day 4.
+3. One-time identity setup:
 
 ```bash
-git config --global user.name "השם שלכם"
+git config --global user.name "Your Name"
 git config --global user.email "you@example.com"
 ```
 
-</div>
-
-4. שכפול (clone) של מאגר הקורס — הקישור המדויק יינתן על ידי המרצה:
-
-<div dir="ltr">
+4. Clone the course repository — the exact link will be given by the instructor:
 
 ```bash
 git clone <course-repo-url>
 cd <course-repo-folder>
 ```
 
-</div>
+Verification: `git --version` prints a version.
 
-אימות: `git --version` מדפיס גרסה.
+## 6. HTTP tools for Day 2
 
-## 6. כלי HTTP ליום 2
+On Day 2 we'll call REST APIs and work with JSON. You need a tool for sending requests and inspecting responses:
 
-ביום 2 נקרא ל-REST APIs ונעבוד עם JSON. צריך כלי לשליחת בקשות ובדיקת תשובות:
-
-- **Postman** (https://www.postman.com/downloads/) — ממשק גרפי מלא. מספיק החשבון החינמי.
-- **REST Client** (תוסף ל-VS Code) — כותבים בקשות בקובץ טקסט ולוחצים "Send Request". קל, מהיר, ונשמר ב-Git יחד עם הקוד. דוגמה לקובץ `requests.http`:
-
-<div dir="ltr">
+- **Postman** (https://www.postman.com/downloads/) — a full graphical interface. The free account is enough.
+- **REST Client** (a VS Code extension) — you write requests in a text file and click "Send Request". Light, fast, and saved in Git together with the code. Example `requests.http` file:
 
 ```text
 GET https://api.github.com/repos/dotnet/runtime
 Accept: application/json
 ```
 
-</div>
-
-- **curl** — כלי שורת פקודה. מגיע מובנה ב-Windows 10/11, macOS ו-Linux:
-
-<div dir="ltr">
+- **curl** — a command-line tool. Built into Windows 10/11, macOS and Linux:
 
 ```bash
 curl -s https://api.github.com/repos/dotnet/runtime
 ```
 
-</div>
+Note: in PowerShell, `curl` is sometimes an alias for `Invoke-WebRequest`, which has a different syntax. Type `curl.exe` to run the real curl.
 
-שימו לב: ב-PowerShell `curl` הוא לפעמים כינוי (alias) ל-`Invoke-WebRequest` עם תחביר שונה. הקלידו `curl.exe` כדי להריץ את ה-curl האמיתי.
+- **Windows Terminal** (recommended) — a modern terminal with tabs and good UTF-8 and Unicode support. Installed by default on Windows 11; on Windows 10, install it from the Microsoft Store.
 
-- **Windows Terminal** (מומלץ) — טרמינל מודרני עם לשוניות, תמיכה טובה ב-UTF-8 ובעברית. מותקן כברירת מחדל ב-Windows 11; ב-Windows 10 מתקינים מ-Microsoft Store.
+## 7. AI tools for Day 4 — create accounts in advance
 
-## 7. כלי AI ליום 4 — לפתוח חשבונות מראש
+On Day 4 we'll work hands-on with AI assistants. Creating accounts and verifying payment methods takes time — do it **before** the course. Some tools are paid or have a trial period; **check the current pricing on each tool's website**, it changes.
 
-ביום 4 נעבוד "ידיים על המקלדת" עם עוזרי AI. פתיחת חשבונות ואימות אמצעי תשלום לוקחים זמן — עשו זאת **לפני** הקורס. חלק מהכלים בתשלום או עם תקופת ניסיון; **בדקו את התמחור העדכני באתר של כל כלי**, הוא משתנה.
-
-| כלי | מה זה | איך מתקינים |
+| Tool | What it is | How to install |
 |-----|-------|-------------|
-| **GitHub Copilot** | השלמת קוד וצ'אט בתוך ה-IDE | דורש חשבון GitHub עם מנוי Copilot (יש תוכנית חינמית מוגבלת ותוכניות בתשלום — בדקו ב-https://github.com/features/copilot). ב-Visual Studio: מובנה בגרסאות החדשות, מתחברים עם חשבון GitHub. ב-VS Code: תוסף "GitHub Copilot" + "GitHub Copilot Chat". |
-| **Claude** | צ'אט עם המודל של Anthropic בדפדפן | חשבון ב-https://claude.ai |
-| **Claude Code** | סוכן קוד בטרמינל שעובד על המאגר שלכם | דורש Node.js (סעיף 8). התקנה: `npm install -g @anthropic-ai/claude-code`, ואז `claude` בתיקיית הפרויקט. מידע עדכני: https://docs.anthropic.com/en/docs/claude-code |
-| **ChatGPT** | צ'אט של OpenAI בדפדפן | חשבון ב-https://chatgpt.com |
-| **Cursor** (אופציונלי) | עורך קוד מבוסס VS Code עם AI מובנה | https://cursor.com — יש תקופת ניסיון; לא חובה לקורס |
+| **GitHub Copilot** | Code completion and chat inside the IDE | Requires a GitHub account with a Copilot subscription (there's a limited free plan and paid plans — see https://github.com/features/copilot). In Visual Studio: built into recent versions; sign in with your GitHub account. In VS Code: the "GitHub Copilot" + "GitHub Copilot Chat" extensions. |
+| **Claude** | Chat with Anthropic's model in the browser | An account at https://claude.ai |
+| **Claude Code** | A coding agent in the terminal that works on your repository | Requires Node.js (section 8). Install: `npm install -g @anthropic-ai/claude-code`, then run `claude` in the project folder. Up-to-date info: https://docs.anthropic.com/en/docs/claude-code |
+| **ChatGPT** | OpenAI's chat in the browser | An account at https://chatgpt.com |
+| **Cursor** (optional) | A VS Code–based code editor with built-in AI | https://cursor.com — has a trial period; not required for the course |
 
-אימות: התחברו לכל אחד מהכלים פעם אחת ושלחו שאלה קצרה, כדי לוודא שהחשבון פעיל.
+Verification: sign in to each tool once and send a short question, to make sure the account is active.
 
 ## 8. Node.js LTS
 
-Node.js נדרש בקורס להתקנת **Claude Code** (מופץ דרך npm), ביום 4.
+In this course, Node.js is needed to install **Claude Code** (distributed via npm), on Day 4.
 
-1. הורידו את גרסת ה-**LTS** מ-https://nodejs.org/ והתקינו עם ברירות המחדל.
-2. פתחו טרמינל חדש ובדקו:
-
-<div dir="ltr">
+1. Download the **LTS** version from https://nodejs.org/ and install with the defaults.
+2. Open a new terminal and check:
 
 ```bash
 node --version
 npm --version
 ```
 
-</div>
-
-3. התקינו את Claude Code:
-
-<div dir="ltr">
+3. Install Claude Code:
 
 ```bash
 npm install -g @anthropic-ai/claude-code
 claude --version
 ```
 
-</div>
-
-## 9. אופציונלי אבל שימושי
+## 9. Optional but useful
 
 ### LINQPad
-https://www.linqpad.net/ — "מחברת" ל-C#: כותבים ביטוי או קטע קוד ורואים תוצאה מיד, בלי ליצור פרויקט. נהדר לניסויים ב-LINQ (יום 1) וב-async (יום 2). גרסה חינמית זמינה (Windows בלבד).
+https://www.linqpad.net/ — a "notebook" for C#: write an expression or a code snippet and see the result immediately, without creating a project. Great for experimenting with LINQ (Day 1) and async (Day 2). A free edition is available (Windows only).
 
 ### dotnet tools
-כלים גלובליים שמותקנים דרך ה-CLI. שימושי ליום 2 (ניטור threads ו-GC):
-
-<div dir="ltr">
+Global tools installed through the CLI. Useful for Day 2 (monitoring threads and the GC):
 
 ```bash
 dotnet tool install --global dotnet-counters
 dotnet-counters --version
 ```
 
-</div>
-
-### .NET CLI — פקודות שכדאי להכיר
-
-<div dir="ltr">
+### .NET CLI — commands worth knowing
 
 ```bash
-dotnet new list                       # רשימת התבניות הזמינות
-dotnet new console -n MyApp           # פרויקט קונסולה חדש בתיקייה MyApp
-dotnet new xunit -n MyApp.Tests       # פרויקט בדיקות
-dotnet run                            # בנייה + הרצה של הפרויקט בתיקייה הנוכחית
-dotnet run -- arg1 arg2               # העברת ארגומנטים לתוכנית
-dotnet build                          # בנייה בלבד
-dotnet test                           # הרצת בדיקות
-dotnet add package Newtonsoft.Json    # הוספת חבילת NuGet
-dotnet add reference ../Lib/Lib.csproj # הפניה לפרויקט אחר
-dotnet format                         # עיצוב קוד לפי .editorconfig
-dotnet --list-sdks                    # אילו SDKs מותקנים
-dotnet --list-runtimes                # אילו Runtimes מותקנים
+dotnet new list                       # list available templates
+dotnet new console -n MyApp           # new console project in folder MyApp
+dotnet new xunit -n MyApp.Tests       # test project
+dotnet run                            # build + run the project in the current folder
+dotnet run -- arg1 arg2               # pass arguments to the program
+dotnet build                          # build only
+dotnet test                           # run tests
+dotnet add package Newtonsoft.Json    # add a NuGet package
+dotnet add reference ../Lib/Lib.csproj # reference another project
+dotnet format                         # format code according to .editorconfig
+dotnet --list-sdks                    # which SDKs are installed
+dotnet --list-runtimes                # which runtimes are installed
 ```
 
-</div>
+## 10. Verifying the installation
 
-## 10. אימות ההתקנה
-
-### תוכנית האימות
-בתיקייה `00-Setup/VerifySetup` יש פרויקט קונסולה קטן שבודק את הסביבה. הריצו:
-
-<div dir="ltr">
+### The verification program
+The `00-Setup/VerifySetup` folder contains a small console project that checks your environment. Run:
 
 ```bash
 cd 00-Setup/VerifySetup
 dotnet run
 ```
 
-</div>
+The program prints the .NET version, the operating system, whether SDK 10 is installed, whether NuGet is reachable, and runs a JSON check and an async check. At the end there's a summary with ✅ / ⚠️ / ❌. A ⚠️ on Windows or NuGet is only a warning (for example on macOS); ❌ means something needs fixing.
 
-התוכנית מדפיסה את גרסת .NET, מערכת ההפעלה, האם יש SDK 10, האם יש גישה ל-NuGet, ומבצעת בדיקת JSON ו-async. בסוף מופיע סיכום עם ✅ / ⚠️ / ❌. סימן ⚠️ על Windows או על NuGet הוא אזהרה בלבד (למשל ב-macOS); ❌ פירושו שיש משהו לתקן.
+### Checklist
 
-### רשימת בדיקה
-
-| כלי | פקודה לבדיקה | תוצאה צפויה |
+| Tool | Command to check | Expected result |
 |-----|--------------|-------------|
 | .NET SDK | `dotnet --version` | `10.x.y` |
-| SDKs מותקנים | `dotnet --list-sdks` | שורה שמתחילה ב-`10.` |
-| יצירה והרצה | `dotnet new console -n Hello && cd Hello && dotnet run` | `Hello, World!` |
-| Visual Studio | פתיחת VS -> Create a new project -> חיפוש "WPF Application" | התבנית מופיעה (Windows בלבד) |
-| VS Code + C# Dev Kit | פתיחת תיקיית פרויקט, F5 | התוכנית רצה עם debugger |
+| Installed SDKs | `dotnet --list-sdks` | A line starting with `10.` |
+| Create and run | `dotnet new console -n Hello && cd Hello && dotnet run` | `Hello, World!` |
+| Visual Studio | Open VS -> Create a new project -> search for "WPF Application" | The template appears (Windows only) |
+| VS Code + C# Dev Kit | Open a project folder, F5 | The program runs with the debugger |
 | Git | `git --version` | `git version 2.x` |
-| GitHub | התחברות ב-https://github.com | דף הבית של החשבון |
-| curl | `curl.exe --version` (Windows) / `curl --version` | גרסה מודפסת |
-| Postman / REST Client | שליחת `GET https://api.github.com` | תשובת JSON עם קוד 200 |
-| Node.js | `node --version` | `v22.x` או LTS חדש יותר |
-| npm | `npm --version` | מספר גרסה |
-| Claude Code | `claude --version` | מספר גרסה |
-| GitHub Copilot | פתיחת קובץ `.cs` ב-IDE | הצעות השלמה באפור |
-| Claude / ChatGPT | התחברות בדפדפן | צ'אט פעיל |
-| תוכנית האימות | `cd 00-Setup/VerifySetup && dotnet run` | "✅ הכול מוכן" (או ⚠️ בלבד) |
+| GitHub | Sign in at https://github.com | Your account's home page |
+| curl | `curl.exe --version` (Windows) / `curl --version` | A version is printed |
+| Postman / REST Client | Send `GET https://api.github.com` | A JSON response with status 200 |
+| Node.js | `node --version` | `v22.x` or a newer LTS |
+| npm | `npm --version` | A version number |
+| Claude Code | `claude --version` | A version number |
+| GitHub Copilot | Open a `.cs` file in the IDE | Gray completion suggestions |
+| Claude / ChatGPT | Sign in in the browser | An active chat |
+| Verification program | `cd 00-Setup/VerifySetup && dotnet run` | "✅ All set" (or only ⚠️) |
 
-## 11. פתרון בעיות (Troubleshooting)
+## 11. Troubleshooting
 
-### `dotnet` לא מזוהה כפקודה ('dotnet' is not recognized)
-- סגרו ופתחו מחדש את הטרמינל (ואת VS Code / Visual Studio) — משתני הסביבה נטענים רק בתהליכים חדשים.
-- ב-Windows בדקו ש-`C:\Program Files\dotnet\` נמצא ב-PATH: Settings -> System -> About -> Advanced system settings -> Environment Variables.
-- ב-macOS/Linux ודאו ש-`/usr/local/share/dotnet` (או `/usr/share/dotnet`, לפי ההתקנה) נמצא ב-PATH, למשל בקובץ `~/.zshrc` או `~/.bashrc`.
+### `dotnet` is not recognized as a command ('dotnet' is not recognized)
+- Close and reopen the terminal (and VS Code / Visual Studio) — environment variables are only loaded into new processes.
+- On Windows, check that `C:\Program Files\dotnet\` is in the PATH: Settings -> System -> About -> Advanced system settings -> Environment Variables.
+- On macOS/Linux, make sure `/usr/local/share/dotnet` (or `/usr/share/dotnet`, depending on the installation) is in the PATH, for example in `~/.zshrc` or `~/.bashrc`.
 
-### יש כמה SDKs מותקנים והפרויקט משתמש בגרסה הלא נכונה
-ה-CLI בוחר את ה-SDK **החדש ביותר** אלא אם יש קובץ `global.json` בתיקייה או באחת מתיקיות האב. בדקו עם `dotnet --version` בתוך תיקיית הפרויקט. כדי לנעול גרסה (למשל אם יש לכם גם 11 preview):
-
-<div dir="ltr">
+### Several SDKs are installed and the project uses the wrong version
+The CLI picks the **newest** SDK unless there's a `global.json` file in the folder or in one of its parent folders. Check with `dotnet --version` inside the project folder. To pin a version (for example if you also have an 11 preview):
 
 ```json
 {
@@ -267,16 +223,12 @@ dotnet run
 }
 ```
 
-</div>
+You can create it automatically with `dotnet new globaljson --sdk-version 10.0.100`. If you get the error "The specified SDK version could not be found", either delete `global.json` or install the version it requires.
 
-יוצרים אוטומטית עם `dotnet new globaljson --sdk-version 10.0.100`. אם מופיעה שגיאה "The specified SDK version could not be found" — או שמוחקים את `global.json`, או שמתקינים את הגרסה שהוא דורש.
-
-### NuGet restore נכשל מאחורי proxy ארגוני
-תסמינים: `error NU1301: Unable to load the service index for source https://api.nuget.org/v3/index.json`.
-- הגדירו את ה-proxy כמשתני סביבה: `HTTPS_PROXY=http://proxy.company.com:8080` (ואם צריך גם `HTTP_PROXY`). NuGet וה-CLI מכבדים אותם.
-- לחלופין, בקובץ `NuGet.Config` (ב-Windows: `%AppData%\NuGet\NuGet.Config`) מוסיפים:
-
-<div dir="ltr">
+### NuGet restore fails behind a corporate proxy
+Symptoms: `error NU1301: Unable to load the service index for source https://api.nuget.org/v3/index.json`.
+- Set the proxy as environment variables: `HTTPS_PROXY=http://proxy.company.com:8080` (and `HTTP_PROXY` too if needed). NuGet and the CLI respect them.
+- Alternatively, in the `NuGet.Config` file (on Windows: `%AppData%\NuGet\NuGet.Config`) add:
 
 ```xml
 <configuration>
@@ -286,48 +238,36 @@ dotnet run
 </configuration>
 ```
 
-</div>
+- Many organizations replace TLS certificates (SSL inspection). If you get a "certificate" error, ask IT for the corporate CA certificate and install it in the system certificate store.
+- If you have an internal NuGet feed (Artifactory / Azure Artifacts), ask IT for the URL and add it: `dotnet nuget add source <url> -n corp`.
 
-- ארגונים רבים מחליפים תעודות TLS (SSL inspection). אם מופיעה שגיאת "certificate" — בקשו מה-IT את תעודת ה-CA הארגונית והתקינו אותה במאגר התעודות של המערכת.
-- אם יש לכם NuGet פנימי (Artifactory / Azure Artifacts) — בקשו מה-IT את הכתובת והוסיפו: `dotnet nuget add source <url> -n corp`.
+### `EnableWindowsTargeting` — building a WPF project on a non-Windows machine
+A project with `<TargetFramework>net10.0-windows</TargetFramework>` fails on macOS/Linux with NETSDK1100. Adding `<EnableWindowsTargeting>true</EnableWindowsTargeting>` to the `.csproj` lets you **build** (compile) it there too — but not run it; WPF runs only on Windows. The course's WPF projects already include this setting, so you can at least read and compile them on any system.
 
-### `EnableWindowsTargeting` — בניית פרויקט WPF שלא על Windows
-פרויקט עם `<TargetFramework>net10.0-windows</TargetFramework>` נכשל ב-macOS/Linux עם NETSDK1100. הוספת `<EnableWindowsTargeting>true</EnableWindowsTargeting>` ל-`.csproj` מאפשרת **לבנות** (compile) אותו גם שם — אבל לא להריץ; WPF רץ רק ב-Windows. פרויקטי ה-WPF בקורס כבר כוללים את ההגדרה, כך שאפשר לפחות לקרוא ולקמפל אותם בכל מערכת.
-
-### HTTPS dev certificate — אזהרות אבטחה כשמריצים Web API מקומי
-אם ביום 2 תרימו Web API מקומי (`dotnet new webapi`) והדפדפן/הלקוח מתלונן על תעודה לא מהימנה:
-
-<div dir="ltr">
+### HTTPS dev certificate — security warnings when running a local Web API
+If on Day 2 you run a local Web API (`dotnet new webapi`) and the browser/client complains about an untrusted certificate:
 
 ```bash
 dotnet dev-certs https --trust
 ```
 
-</div>
-
-ב-Windows ו-macOS תופיע בקשת אישור. ב-Linux הפקודה מייצרת את התעודה אבל לא תמיד מוסיפה אותה למאגר המהימן — ראו את ההוראות בפלט. לחלופין, עבדו מול הכתובת `http://` שמופיעה ב-`launchSettings.json`.
+On Windows and macOS a confirmation prompt appears. On Linux the command creates the certificate but doesn't always add it to the trusted store — see the instructions in the output. Alternatively, work against the `http://` address listed in `launchSettings.json`.
 
 ### PowerShell: "running scripts is disabled on this system"
-קורה כשמריצים סקריפט `.ps1` (למשל סקריפט התקנה או `dotnet-install.ps1`). פתרון למשתמש הנוכחי בלבד (לא דורש מנהל):
-
-<div dir="ltr">
+This happens when you run a `.ps1` script (for example an installation script or `dotnet-install.ps1`). A fix for the current user only (doesn't require admin):
 
 ```text
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
 
-</div>
+Alternatively, run the single script with `powershell -ExecutionPolicy Bypass -File script.ps1`.
 
-לחלופין הריצו את הסקריפט הבודד עם `powershell -ExecutionPolicy Bypass -File script.ps1`.
+### Non-English text or emoji show up as question marks in the console
+Use Windows Terminal (not the old cmd), and choose a font that supports Unicode (for example Cascadia Code). In code: `Console.OutputEncoding = Encoding.UTF8;` (the verification program already does this).
 
-### עברית או אמוג'י מופיעים כסימני שאלה בקונסולה
-השתמשו ב-Windows Terminal (ולא ב-cmd הישן), ובחרו גופן שתומך ב-Unicode (למשל Cascadia Code). בקוד: `Console.OutputEncoding = Encoding.UTF8;` (תוכנית האימות כבר עושה זאת).
+### Visual Studio doesn't offer the "WPF Application" template
+The ".NET desktop development" workload isn't installed. Open Visual Studio Installer -> Modify -> select the workload -> Modify.
 
-### Visual Studio לא מציע את התבנית "WPF Application"
-ה-workload ".NET desktop development" לא מותקן. פתחו Visual Studio Installer -> Modify -> סמנו את ה-workload -> Modify.
-
-### עדיין תקועים?
-- הריצו `dotnet --info` ושלחו את הפלט למרצה (בקבוצת הקורס או במייל) יחד עם הודעת השגיאה המלאה.
-- הגיעו 20 דקות מוקדם ביום הראשון — נקדיש את הזמן לפתרון בעיות התקנה.
-
-</div>
+### Still stuck?
+- Run `dotnet --info` and send the output to the instructor (in the course group or by email) together with the full error message.
+- Arrive 20 minutes early on Day 1 — we'll use that time to solve installation problems.

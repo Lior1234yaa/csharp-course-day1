@@ -1,35 +1,35 @@
 // =====================================================================
-// Day1.Demo.Quickstart — חימום C#
-// מה הדמו מראה:
-//   * top-level statements (אין Main מפורש)
-//   * טיפוסי ערך מול טיפוסי הפניה (struct/int מול class/array)
-//   * var, מחרוזות ואינטרפולציה, בקרת זרימה (if / switch expression / loops)
-//   * מתודות עם פרמטרים אופציונליים, out ו-tuples
-//   * nullable reference types (string?) והפעולות ?. ?? !
-// הרצה:  dotnet run
+// Day1.Demo.Quickstart — C# warm-up
+// What the demo shows:
+//   * top-level statements (no explicit Main)
+//   * value types vs reference types (struct/int vs class/array)
+//   * var, strings and interpolation, control flow (if / switch expression / loops)
+//   * methods with optional parameters, out and tuples
+//   * nullable reference types (string?) and the operators ?. ?? !
+// Run:  dotnet run
 // =====================================================================
 
 Console.WriteLine("=== 1. Variables, var and interpolation ===");
-int age = 30;                    // טיפוס ערך
+int age = 30;                    // value type
 double price = 19.90;
-string name = "Dana";            // טיפוס הפניה (אך immutable)
-var isActive = true;             // המהדר מסיק bool
+string name = "Dana";            // reference type (but immutable)
+var isActive = true;             // the compiler infers bool
 Console.WriteLine($"{name} is {age} years old, price={price:F2}, active={isActive}");
 Console.WriteLine($"Rounded: {Math.Round(price)}  |  Upper: {name.ToUpper()}  |  Len: {name.Length}");
 
 Console.WriteLine("\n=== 2. Value vs reference ===");
 int a = 5;
-int b = a;          // העתקה של הערך
+int b = a;          // copies the value
 b++;
 Console.WriteLine($"a={a}, b={b}   (int is a value type: changing b did not affect a)");
 
 int[] arr1 = { 1, 2, 3 };
-int[] arr2 = arr1;  // העתקה של ההפניה — שני השמות מצביעים לאותו מערך
+int[] arr2 = arr1;  // copies the reference — both names point to the same array
 arr2[0] = 99;
 Console.WriteLine($"arr1[0]={arr1[0]}   (an array is a reference type: the change is visible through both references)");
 
 Point p1 = new(1, 2);
-Point p2 = p1;      // struct → העתקה
+Point p2 = p1;      // struct → copy
 p2.X = 100;
 Console.WriteLine($"p1.X={p1.X}, p2.X={p2.X}   (struct is copied)");
 
@@ -64,15 +64,15 @@ var (min, max) = MinMax([4, 9, 1, 7]);
 Console.WriteLine($"min={min}, max={max}");
 
 Console.WriteLine("\n=== 5. Nullable reference types ===");
-string? maybeName = FindUser(1);   // יכול להיות null
+string? maybeName = FindUser(1);   // can be null
 Console.WriteLine($"Length via ?. : {maybeName?.Length}");
 Console.WriteLine($"With ?? : {maybeName ?? "(unknown)"}");
 string? found = FindUser(0);
 Console.WriteLine($"found = {found ?? "null"}");
 if (found is not null)
-    Console.WriteLine($"found has {found.Length} chars"); // המהדר יודע שכאן found אינו null
+    Console.WriteLine($"found has {found.Length} chars"); // the compiler knows found is not null here
 
-// ---------- מתודות עזר (local functions ברמת הקובץ) ----------
+// ---------- Helper methods (file-level local functions) ----------
 static int Add(int x, int y) => x + y;
 
 static string Greet(string who, string greeting = "Hello") => $"{greeting}, {who}!";
@@ -88,7 +88,7 @@ static (int Min, int Max) MinMax(int[] values) => (values.Min(), values.Max());
 
 static string? FindUser(int id) => id == 0 ? "admin" : null;
 
-// struct — טיפוס ערך שהגדרנו בעצמנו
+// struct — a value type we defined ourselves
 struct Point
 {
     public int X;

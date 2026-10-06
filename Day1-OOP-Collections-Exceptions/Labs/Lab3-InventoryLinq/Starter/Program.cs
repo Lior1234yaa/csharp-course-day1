@@ -1,10 +1,10 @@
-// Day1.Lab3.Starter — מלאי עם LINQ, delegates ואירועים
-// השלימו את ה-TODO ב-Inventory.cs ו-Reports.cs; ה-Program כבר כתוב ויעבוד ברגע שתסיימו.
+// Day1.Lab3.Starter — Inventory with LINQ, delegates and events
+// Complete the TODOs in Inventory.cs and Reports.cs; Program is already written and will work as soon as you finish.
 using Day1.Lab3;
 
 var inv = new Inventory();
 
-// TODO 16: הירשמו לאירוע LowStock והדפיסו: "  !! LOW STOCK: <name> (<qty> left, reorder at <level>)"
+// TODO 16: Subscribe to the LowStock event and print: "  !! LOW STOCK: <name> (<qty> left, reorder at <level>)"
 
 Seed(inv);
 

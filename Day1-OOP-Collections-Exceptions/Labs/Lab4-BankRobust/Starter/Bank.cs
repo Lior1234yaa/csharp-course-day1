@@ -9,7 +9,7 @@ public class Account(string id, string owner)
 
     public void Deposit(decimal amount)
     {
-        // BUG? בדקו: אילו סכומים אמורים להידחות?
+        // BUG? Check: which amounts should be rejected?
         if (amount < 0) throw new BankException($"Invalid amount {amount}");
         Balance += amount;
         History.Add($"deposit {amount:N2} -> {Balance:N2}");
@@ -26,7 +26,7 @@ public class Account(string id, string owner)
 
     public IEnumerable<string> RecentHistory(int count)
     {
-        // מחזיר את count הפעולות האחרונות
+        // Returns the last count operations
         int start = History.Count - count - 1;
         if (start < 0) start = 0;
         for (int i = start; i < History.Count; i++)

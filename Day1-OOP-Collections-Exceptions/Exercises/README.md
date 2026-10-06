@@ -1,11 +1,7 @@
-<div dir="rtl">
+# Exercises — Day 1
 
-# תרגילים — יום 1
-
-תרגילים קצרים (5–15 דקות כל אחד), מקובצים לפי מודול. דרגת קושי: ★ קל, ★★ בינוני, ★★★ מאתגר.
-פתרו כל תרגיל בפרויקט חדש משלכם:
-
-<div dir="ltr">
+Short exercises (5–15 minutes each), grouped by module. Difficulty: ★ easy, ★★ medium, ★★★ challenging.
+Solve each exercise in a new project of your own:
 
 ```bash
 dotnet new console -n Ex03
@@ -13,70 +9,66 @@ cd Ex03
 dotnet run
 ```
 
-</div>
+We'll go over the solutions together in class.
 
-את הפתרונות נעבור יחד בכיתה.
+## Module 01 — C# warm-up
 
-## מודול 01 — חימום C#
+### Exercise 1 ★ — Temperature converter
+Write two methods: `CelsiusToFahrenheit(double c)` and `FahrenheitToCelsius(double f)` (expression-bodied). Print a table from −10 to 40 degrees Celsius in steps of 10, using interpolation and formatting with one digit after the decimal point (`{x:F1}`).
 
-### תרגיל 1 ★ — ממיר טמפרטורות
-כתבו שתי מתודות: `CelsiusToFahrenheit(double c)` ו-`FahrenheitToCelsius(double f)` (expression-bodied). הדפיסו טבלה מ-−10 עד 40 מעלות צלזיוס בקפיצות של 10, עם אינטרפולציה ופורמט של ספרה אחת אחרי הנקודה (`{x:F1}`).
+### Exercise 2 ★ — FizzBuzz with a switch expression
+For each number from 1 to 20: "FizzBuzz" if divisible by 15, "Fizz" if divisible by 3, "Buzz" if divisible by 5, otherwise the number itself. Use a `switch` expression with a tuple pattern: `(n % 3, n % 5) switch { (0, 0) => ..., (0, _) => ... }`.
 
-### תרגיל 2 ★ — FizzBuzz עם switch expression
-לכל מספר מ-1 עד 20: "FizzBuzz" אם מתחלק ב-15, "Fizz" ב-3, "Buzz" ב-5, אחרת המספר. השתמשו ב-`switch` expression עם tuple pattern: `(n % 3, n % 5) switch { (0, 0) => ..., (0, _) => ... }`.
+## Module 02 — Classes and objects
 
-## מודול 02 — מחלקות ואובייקטים
+### Exercise 3 ★ — A `Rectangle` class
+A class with properties `Width`, `Height` (read-only, set in a constructor that validates they are positive), a computed property `Area`, a method `Scale(double factor)` that returns a **new** rectangle, and `ToString()`. Create two rectangles and print them.
 
-### תרגיל 3 ★ — מחלקת `Rectangle`
-מחלקה עם properties `Width`, `Height` (קריאה בלבד, נקבעות בבנאי שמוודא ערכים חיוביים), property מחושב `Area`, מתודה `Scale(double factor)` שמחזירה מלבן **חדש**, ו-`ToString()`. צרו שני מלבנים והדפיסו.
+### Exercise 4 ★★ — `record` vs. `class` and a static counter
+a. Define `record Point(int X, int Y)` and `class PointClass` with the same fields. Create two equal instances of each and print `==` and `Equals`. Explain the difference in a comment.
+b. Add to `PointClass` a static counter `Created` that is incremented in every constructor call, and a static method `Origin()` that returns (0,0).
+c. Use `with` to create a shifted point from the record.
 
-### תרגיל 4 ★★ — `record` מול `class` ו-static counter
-א. הגדירו `record Point(int X, int Y)` ו-`class PointClass` עם אותם שדות. צרו שני מופעים שווים מכל אחד והדפיסו `==` ו-`Equals`. הסבירו את ההבדל בהערה.
-ב. הוסיפו ל-`PointClass` מונה סטטי `Created` שגדל בכל בנאי, ומתודה סטטית `Origin()` שמחזירה (0,0).
-ג. השתמשו ב-`with` כדי ליצור נקודה מוזזת מה-record.
+## Module 03 — OOP principles
 
-## מודול 03 — עקרונות OOP
+### Exercise 5 ★★ — Vehicles
+An abstract class `Vehicle` (`Name`, abstract `Wheels`, `virtual Describe()`), with derived classes `Car`, `Motorcycle`, `Truck` (`LoadCapacity`). An interface `IElectric { int BatteryKwh { get; } }` that one kind of `Car` implements (`ElectricCar : Car, IElectric`). Iterate over a `List<Vehicle>` and print `Describe()`; then print only the electric ones (`OfType<IElectric>()`).
 
-### תרגיל 5 ★★ — כלי רכב
-מחלקה אבסטרקטית `Vehicle` (`Name`, `Wheels` אבסטרקטי, `virtual Describe()`), יורשים `Car`, `Motorcycle`, `Truck` (`LoadCapacity`). ממשק `IElectric { int BatteryKwh { get; } }` ש-`Car` אחד מממש (`ElectricCar : Car, IElectric`). עברו על `List<Vehicle>` והדפיסו `Describe()`; ואז הדפיסו רק את החשמליים (`OfType<IElectric>()`).
+### Exercise 6 ★★ — Pattern matching
+A method `string Classify(object o)` that returns a description for: negative `int` / positive `int` / empty `string` / other `string` / `double` / `int[]` with 0 elements / other `int[]` / `null` / anything else. Use a `switch` expression with type patterns, property patterns (`{ Length: 0 }`) and `when`. Run it on a mixed `object[]` array.
 
-### תרגיל 6 ★★ — pattern matching
-מתודה `string Classify(object o)` שמחזירה תיאור ל: `int` שלילי / `int` חיובי / `string` ריק / `string` אחר / `double` / `int[]` עם 0 איברים / `int[]` אחר / `null` / כל דבר אחר. השתמשו ב-`switch` expression עם type patterns, property patterns (`{ Length: 0 }`) ו-`when`. הריצו על מערך `object[]` מעורב.
+## Module 04 — Collections and generics
 
-## מודול 04 — אוספים וגנריקה
+### Exercise 7 ★ — Word count
+Take a sentence (hard-coded), split it into words (`Split`), and count how many times each word appears using a `Dictionary<string, int>` (case-insensitive). Print the results sorted by descending frequency, then alphabetically.
 
-### תרגיל 7 ★ — ספירת מילים
-קבלו משפט (קבוע בקוד), פצלו למילים (`Split`), וספרו כמה פעמים כל מילה מופיעה ב-`Dictionary<string, int>` (לא תלוי רישיות). הדפיסו ממוין לפי שכיחות יורדת ואז אלפביתי.
+### Exercise 8 ★★ — A generic `MyStack<T>`
+Implement a stack on top of an internal array: `Push`, `Pop` (throws `InvalidOperationException` when empty), `Peek`, `Count`, `IsEmpty`. The array doubles in size when it fills up. Add the constraint `where T : notnull`. Test it with `int` and with `string`.
 
-### תרגיל 8 ★★ — `MyStack<T>` גנרי
-מימוש מחסנית על גבי מערך פנימי: `Push`, `Pop` (זורק `InvalidOperationException` כשריק), `Peek`, `Count`, `IsEmpty`. המערך גדל פי 2 כשמתמלא. הוסיפו constraint `where T : notnull`. בדקו עם `int` ועם `string`.
+### Exercise 9 ★★ — The right collection
+For each scenario, choose a collection and justify your choice in a comment, then implement it: (a) unique visitor IDs from a list with duplicates — how many are unique? (b) a print queue — documents are handled in order of arrival. (c) an "Undo" history. (d) fast lookup of a student by national ID number. (e) a list of grades for computing an average.
 
-### תרגיל 9 ★★ — האוסף הנכון
-לכל תרחיש בחרו אוסף ונמקו בהערה, ואז ממשו: (א) מזהי מבקרים ייחודיים מתוך רשימה עם כפילויות — כמה ייחודיים? (ב) תור הדפסה — מסמכים מטופלים לפי סדר הגעה. (ג) היסטוריית "Undo". (ד) חיפוש מהיר של סטודנט לפי ת"ז. (ה) רשימה של ציונים לצורך ממוצע.
+## Module 05 — Delegates, Lambdas, LINQ
 
-## מודול 05 — Delegates, Lambdas, LINQ
+### Exercise 10 ★ — LINQ on numbers
+For `int[] nums = [5, 3, 8, 1, 9, 2, 7, 4, 6, 10]`: the sum of the squares of the even numbers, the three largest numbers, whether any number is > 9, the average of the odd numbers, and a string of the numbers sorted (`string.Join`). Each answer in a single LINQ line.
 
-### תרגיל 10 ★ — LINQ על מספרים
-עבור `int[] nums = [5, 3, 8, 1, 9, 2, 7, 4, 6, 10]`: סכום ריבועי הזוגיים, שלושת הגדולים, האם יש מספר > 9, ממוצע האי-זוגיים, ומחרוזת של המספרים ממוינים (`string.Join`). כל תשובה בשורת LINQ אחת.
+### Exercise 11 ★★ — Delegates and an event
+a. A method `Func<int, int> Compose(Func<int, int> f, Func<int, int> g)` that returns `x => g(f(x))`. Test it with `x + 1` and `x * 2`.
+b. A `Counter` class with `Increment()` and an event `ThresholdReached` (`EventHandler<int>`) that is raised when the counter reaches `Threshold`. Subscribe with a lambda and print.
 
-### תרגיל 11 ★★ — delegates ואירוע
-א. מתודה `Func<int, int> Compose(Func<int, int> f, Func<int, int> g)` שמחזירה `x => g(f(x))`. בדקו עם `x + 1` ו-`x * 2`.
-ב. מחלקה `Counter` עם `Increment()` ואירוע `ThresholdReached` (`EventHandler<int>`) שמופעל כשהמונה מגיע ל-`Threshold`. הירשמו עם lambda והדפיסו.
+## Module 06 — Exceptions and debugging
 
-## מודול 06 — חריגות ודיבוג
+### Exercise 12 ★★ — Safe input
+A method `int ReadInt(string prompt, int min, int max)` that asks the user for a number in a loop until the input is valid (`TryParse` + range). On EOF (`ReadLine()` returns `null`) — throw `EndOfStreamException`. Define `class ValidationException : Exception` with an `Input` property, and throw it from `Validate(int age)` if the age is not between 0 and 120. Catch it in `Main` and print a friendly message.
 
-### תרגיל 12 ★★ — קלט בטוח
-מתודה `int ReadInt(string prompt, int min, int max)` שמבקשת מהמשתמש מספר בלולאה עד שהקלט תקין (`TryParse` + טווח). על EOF (`ReadLine()` מחזיר `null`) — זרקו `EndOfStreamException`. הגדירו `class ValidationException : Exception` עם property `Input`, וזרקו אותה מ-`Validate(int age)` אם הגיל לא בין 0 ל-120. תפסו ב-`Main` והדפיסו הודעה ידידותית.
+### Exercise 13 ★★★ — Execution order
+A class `Step(string name) : IDisposable` that prints in its constructor and in `Dispose`. Write a method containing: `using var a = new Step("A");` and then `try { using var b = new Step("B"); throw new InvalidOperationException(); } catch { Console.WriteLine("catch"); } finally { Console.WriteLine("finally"); }`. **Before** running it, write in a comment the order in which you expect the lines to be printed. Run it and check. Add `catch (Exception ex) when (Log(ex))` with a `Log` that prints and returns `false` — when does it run?
 
-### תרגיל 13 ★★★ — סדר הריצה
-מחלקה `Step(string name) : IDisposable` שמדפיסה בבנאי ובדיספוז. כתבו מתודה שמכילה: `using var a = new Step("A");` ואז `try { using var b = new Step("B"); throw new InvalidOperationException(); } catch { Console.WriteLine("catch"); } finally { Console.WriteLine("finally"); }`. **לפני** ההרצה, כתבו בהערה מה סדר ההדפסות הצפוי. הריצו ובדקו. הוסיפו `catch (Exception ex) when (Log(ex))` עם `Log` שמדפיסה ומחזירה `false` — מתי היא רצה?
+## Module 07 — Clean code
 
-## מודול 07 — קוד נקי
-
-### תרגיל 14 ★★ — refactoring
-נתונה המתודה הבאה. שכתבו אותה: שמות ברורים, קבועים במקום מספרי קסם, `enum` לסוג הלקוח, חילוץ מתודות קטנות, והסרת כפילות. התנהגות זהה.
-
-<div dir="ltr">
+### Exercise 14 ★★ — Refactoring
+Here is a method. Rewrite it: clear names, constants instead of magic numbers, an `enum` for the customer type, extract small methods, and remove duplication. The behavior must stay identical.
 
 ```csharp
 static double c(double a, int t, bool m)
@@ -89,7 +81,3 @@ static double c(double a, int t, bool m)
     return r * 1.18;
 }
 ```
-
-</div>
-
-</div>

@@ -1,6 +1,6 @@
 namespace Day1.Lab4;
 
-/// <summary>יומן פעולות שנכתב לקובץ. משאב שצריך לשחרר (IDisposable).</summary>
+/// <summary>A transaction log written to a file. A resource that must be released (IDisposable).</summary>
 public class TransactionLog : IDisposable
 {
     private readonly StreamWriter _writer;
@@ -21,6 +21,6 @@ public class TransactionLog : IDisposable
 
     public void Dispose()
     {
-        _writer.Dispose();   // Flush + סגירת הקובץ
+        _writer.Dispose();   // Flush + close the file
     }
 }

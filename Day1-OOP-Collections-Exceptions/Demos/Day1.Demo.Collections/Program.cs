@@ -1,13 +1,13 @@
 // =====================================================================
-// Day1.Demo.Collections — אוספים וגנריקה
-// מה הדמו מראה:
-//   * מערכים: חד-ממדי, דו-ממדי, jagged, collection expressions
+// Day1.Demo.Collections — collections and generics
+// What the demo shows:
+//   * arrays: one-dimensional, two-dimensional, jagged, collection expressions
 //   * List<T>, Dictionary<K,V>, HashSet<T>, Queue<T>, Stack<T>
-//   * IEnumerable<T> ו-foreach, yield return
-//   * מחלקה גנרית Repository<T> עם constraint (where T : IEntity)
-//   * IReadOnlyList<T> — חשיפת אוסף בלי לאפשר שינוי
-//   * ניהול נתונים יעיל: אינדקס בזיכרון, capacity, Span<T>
-// הרצה:  dotnet run
+//   * IEnumerable<T> and foreach, yield return
+//   * a generic class Repository<T> with a constraint (where T : IEntity)
+//   * IReadOnlyList<T> — exposing a collection without allowing changes
+//   * efficient data management: in-memory index, capacity, Span<T>
+// Run:  dotnet run
 // =====================================================================
 
 Console.WriteLine("=== 1. Arrays ===");
@@ -34,14 +34,14 @@ var stock = new Dictionary<string, int>
     ["apple"] = 10,
     ["banana"] = 0,
 };
-stock["cherry"] = 25;               // הוספה/עדכון
+stock["cherry"] = 25;               // add/update
 stock["apple"] += 5;
 if (stock.TryGetValue("banana", out int bananas)) Console.WriteLine($"banana: {bananas}");
 Console.WriteLine($"has 'kiwi'? {stock.ContainsKey("kiwi")}");
 foreach (var (key, value) in stock) Console.WriteLine($"  {key} -> {value}");
 
 Console.WriteLine("\n=== 4. HashSet / Queue / Stack ===");
-var tags = new HashSet<string> { "c#", "dotnet", "c#" };   // כפילות נבלעת
+var tags = new HashSet<string> { "c#", "dotnet", "c#" };   // the duplicate is silently ignored
 Console.WriteLine($"tags: {string.Join(",", tags)} (count={tags.Count}), added 'oop'? {tags.Add("oop")}, added again? {tags.Add("oop")}");
 
 var queue = new Queue<string>();
@@ -55,7 +55,7 @@ Console.WriteLine($"stack pop → {stack.Pop()} (LIFO)");
 Console.WriteLine("\n=== 5. IEnumerable<T> and yield ===");
 foreach (var n in EvenNumbers(10)) Console.Write($"{n} ");
 Console.WriteLine();
-IEnumerable<int> lazy = EvenNumbers(1_000_000);   // לא מחושב עד שעוברים עליו
+IEnumerable<int> lazy = EvenNumbers(1_000_000);   // not computed until you iterate over it
 Console.WriteLine($"first 3 of a million: {string.Join(",", lazy.Take(3))}");
 
 Console.WriteLine("\n=== 6. Generic Repository<T> ===");
@@ -65,17 +65,17 @@ repo.Add(new Customer(2, "Yossi"));
 repo.Add(new Customer(3, "Noa"));
 Console.WriteLine($"GetById(2) = {repo.GetById(2)?.Name}");
 Console.WriteLine($"GetById(99) = {(repo.GetById(99) is null ? "null" : "found")}");
-IReadOnlyList<Customer> all = repo.All;   // הקורא רואה, אבל לא יכול להוסיף/למחוק
+IReadOnlyList<Customer> all = repo.All;   // the caller can see, but can't add/remove
 Console.WriteLine($"count via IReadOnlyList = {all.Count}");
-// all.Add(...) — לא קיים על IReadOnlyList — אנקפסולציה של האוסף
+// all.Add(...) — doesn't exist on IReadOnlyList — encapsulation of the collection
 
 Console.WriteLine("\n=== 7. Efficiency: capacity and Span<T> ===");
-var big = new List<int>(capacity: 100_000);   // מונע הקצאות חוזרות
+var big = new List<int>(capacity: 100_000);   // avoids repeated reallocations
 for (int i = 0; i < 100_000; i++) big.Add(i);
 Console.WriteLine($"big.Count={big.Count}, Capacity={big.Capacity}");
 
 int[] data = [1, 2, 3, 4, 5, 6];
-Span<int> middle = data.AsSpan(2, 2);          // "חלון" על המערך בלי העתקה
+Span<int> middle = data.AsSpan(2, 2);          // a "window" over the array without copying
 middle[0] = 30;
 Console.WriteLine($"after Span write: {string.Join(",", data)}");
 
@@ -83,18 +83,18 @@ Console.WriteLine($"after Span write: {string.Join(",", data)}");
 static IEnumerable<int> EvenNumbers(int max)
 {
     for (int i = 0; i <= max; i += 2)
-        yield return i;   // מחזיר איבר אחד בכל פעם, לפי דרישה
+        yield return i;   // returns one item at a time, on demand
 }
 
 interface IEntity { int Id { get; } }
 
 record Customer(int Id, string Name) : IEntity;
 
-// מחלקה גנרית עם constraint: T חייב לממש IEntity כדי שנוכל לגשת ל-Id
+// a generic class with a constraint: T must implement IEntity so we can access Id
 class Repository<T> where T : IEntity
 {
     private readonly List<T> _items = [];
-    private readonly Dictionary<int, T> _byId = [];   // אינדקס לחיפוש O(1)
+    private readonly Dictionary<int, T> _byId = [];   // index for O(1) lookup
 
     public IReadOnlyList<T> All => _items;
     public int Count => _items.Count;

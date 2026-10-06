@@ -1,13 +1,13 @@
 // =====================================================================
-// Day1.Demo.LinqDelegates — Delegates, Lambdas, Events ו-LINQ
-// מה הדמו מראה:
-//   * delegate מותאם אישית, Func/Action/Predicate, multicast
-//   * lambdas ו-closures (משתנה שנלכד)
-//   * event עם EventHandler<T> — publisher/subscriber
+// Day1.Demo.LinqDelegates — Delegates, Lambdas, Events and LINQ
+// What the demo shows:
+//   * a custom delegate, Func/Action/Predicate, multicast
+//   * lambdas and closures (a captured variable)
+//   * an event with EventHandler<T> — publisher/subscriber
 //   * LINQ: Where/Select/OrderBy/GroupBy/First/Any/ToDictionary/Aggregate
-//   * method syntax מול query syntax, deferred execution
-//   * סגנון פונקציונלי: פונקציות טהורות ואי-שינוי (records)
-// הרצה:  dotnet run
+//   * method syntax vs query syntax, deferred execution
+//   * functional style: pure functions and immutability (records)
+// Run:  dotnet run
 // =====================================================================
 
 Console.WriteLine("=== 1. delegates ===");
@@ -25,7 +25,7 @@ shout("delegates are fun");
 Action pipeline = () => Console.Write("step1 ");
 pipeline += () => Console.Write("step2 ");
 pipeline += () => Console.WriteLine("step3");
-pipeline();   // multicast — כולם רצים לפי הסדר
+pipeline();   // multicast — all of them run in order
 
 Console.WriteLine("\n=== 2. closures ===");
 var counter = MakeCounter();
@@ -41,7 +41,7 @@ sensor.TemperatureChanged += (_, e) =>
 };
 sensor.Temperature = 25;
 sensor.Temperature = 32;
-sensor.Temperature = 32;   // אין שינוי → אין אירוע
+sensor.Temperature = 32;   // no change → no event
 
 Console.WriteLine("\n=== 4. LINQ ===");
 List<Order> orders =
@@ -84,16 +84,16 @@ foreach (var item in q) Console.WriteLine($"  #{item.Id} {item.Customer}");
 
 Console.WriteLine("\n=== 6. deferred execution ===");
 var numbers = new List<int> { 1, 2, 3 };
-var evens = numbers.Where(n => n % 2 == 0);   // עדיין לא רץ!
+var evens = numbers.Where(n => n % 2 == 0);   // hasn't run yet!
 numbers.Add(4);
 Console.WriteLine($"evens = {string.Join(",", evens)}   (4 is included because the query runs only now)");
-var snapshot = numbers.Where(n => n % 2 == 0).ToList();   // ToList() מקפיא
+var snapshot = numbers.Where(n => n % 2 == 0).ToList();   // ToList() freezes the result
 numbers.Add(6);
 Console.WriteLine($"snapshot = {string.Join(",", snapshot)}   (6 is not included)");
 
 Console.WriteLine("\n=== 7. Functional style ===");
 var cart = new Cart([new("pen", 5m), new("book", 40m)]);
-var discounted = ApplyDiscount(cart, 0.10m);   // פונקציה טהורה — לא משנה את cart
+var discounted = ApplyDiscount(cart, 0.10m);   // a pure function — doesn't change cart
 Console.WriteLine($"original total={cart.Total}, discounted total={discounted.Total}");
 
 // ------------------------------------------------------------------
@@ -102,13 +102,13 @@ static int Apply(int a, int b, MathOp op) => op(a, b);
 static Func<int> MakeCounter()
 {
     int count = 0;
-    return () => ++count;   // closure על count
+    return () => ++count;   // closure over count
 }
 
 static Cart ApplyDiscount(Cart cart, decimal percent) =>
     cart with { Items = cart.Items.Select(i => i with { Price = i.Price * (1 - percent) }).ToList() };
 
-// הצהרת delegate היא הצהרת טיפוס — לכן היא אחרי ה-local functions
+// a delegate declaration is a type declaration — so it comes after the local functions
 delegate int MathOp(int a, int b);
 
 record Order(int Id, string Customer, string Category, decimal Total);

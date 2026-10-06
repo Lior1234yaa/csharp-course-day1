@@ -1,68 +1,60 @@
-<div dir="rtl">
+# Lab 2 — Shapes and Employees: Inheritance, Abstraction and Polymorphism (60 minutes)
 
-# Lab 2 — צורות ועובדים: ירושה, הפשטה ופולימורפיזם (60 דקות)
+## Goal
 
-## מטרה
+Build two small hierarchies and get hands-on experience with the four core concepts: an abstract class that defines a contract, inheritance that extends behavior (`base`), an interface that lets you treat different objects in a uniform way, and polymorphism — one call, different behavior depending on the actual type.
 
-לבנות שתי היררכיות קטנות ולהרגיש בידיים את ארבעת המושגים: מחלקה אבסטרקטית שמגדירה חוזה, ירושה שמרחיבה התנהגות (`base`), ממשק שמאפשר לטפל באובייקטים שונים באופן אחיד, ופולימורפיזם — קריאה אחת, התנהגויות שונות לפי הטיפוס האמיתי.
+## What you need to know first
 
-## מה צריך לדעת לפני
+Modules 02 and 03. Lab 1 is recommended.
 
-מודולים 02 ו-03. Lab 1 מומלץ.
-
-## התחלה
-
-<div dir="ltr">
+## Getting started
 
 ```bash
 cd Labs/Lab2-ShapesAndEmployees/Starter
 dotnet run
 ```
 
-</div>
+## Steps
 
-## שלבים
+### Part A — Shapes (15 min)
 
-### חלק א' — צורות (15 דק')
+1. **TODO 1** — Make `Shape` `abstract`, with abstract `Name`, `Area()` and `Perimeter()` members and a shared `ToString()`.
+2. **TODO 2** — `Circle`, `Rectangle`, `Triangle`. For the triangle, check in the constructor that the sides are valid (the triangle inequality) — otherwise throw `ArgumentException`.
+3. **TODO 3** — `Square : Rectangle`, marked `sealed`. Notice how little code it needs.
+4. **TODO 11** — In `Program.cs`: a `List<Shape>`, printing, the sum of the areas, and an attempt to create an invalid triangle inside a `try/catch`.
 
-1. **TODO 1** — הפכו את `Shape` ל-`abstract` עם `Name`, `Area()`, `Perimeter()` אבסטרקטיים ו-`ToString()` משותף.
-2. **TODO 2** — `Circle`, `Rectangle`, `Triangle`. במשולש, ודאו בבנאי שהצלעות תקינות (אי-שוויון המשולש) — אחרת `ArgumentException`.
-3. **TODO 3** — `Square : Rectangle`, מסומן `sealed`. שימו לב כמה מעט קוד צריך.
-4. **TODO 11** — ב-`Program.cs`: רשימת `List<Shape>`, הדפסה, סכום שטחים, וניסיון ליצור משולש לא חוקי בתוך `try/catch`.
+### Part B — Payroll (45 min)
 
-### חלק ב' — משכורות (45 דק')
+5. **TODO 4** — An `IPayable` interface with `PayeeName`, `CalculateMonthlyPay()`, and a default member `PaySlip()`.
+6. **TODO 5** — An abstract `Employee` class that implements `IPayable`. `CalculateMonthlyPay` stays abstract; `Describe()` is `virtual`.
+7. **TODO 6** — `SalariedEmployee`: annual salary / 12.
+8. **TODO 7** — `HourlyEmployee`: 160 regular hours; anything beyond that is paid at 1.5x. Override `Describe()` and use `base.Describe()`.
+9. **TODO 8** — `Manager : SalariedEmployee` with `Bonus` and `Reports`. `CalculateMonthlyPay` = `base` + bonus.
+10. **TODO 9** — `Contractor`, which implements `IPayable` **without** inheriting from `Employee`. Ask yourself: why?
+11. **TODO 10** — `Payroll` with a `List<IPayable>`: `Add`, `TotalMonthly`, `PrintSlips`.
+12. **TODO 12** — In `Program.cs`: create the employees and the contractor, print the pay slips, and then print `Describe()` for the employees only (`is Employee e`).
 
-5. **TODO 4** — ממשק `IPayable` עם `PayeeName`, `CalculateMonthlyPay()`, ו-default member `PaySlip()`.
-6. **TODO 5** — `Employee` אבסטרקטית שמממשת `IPayable`. `CalculateMonthlyPay` נשאר אבסטרקטי, `Describe()` הוא `virtual`.
-7. **TODO 6** — `SalariedEmployee`: שנתי / 12.
-8. **TODO 7** — `HourlyEmployee`: 160 שעות רגילות, מעבר לזה פי 1.5. דרסו את `Describe()` והשתמשו ב-`base.Describe()`.
-9. **TODO 8** — `Manager : SalariedEmployee` עם `Bonus` ו-`Reports`. `CalculateMonthlyPay` = `base` + בונוס.
-10. **TODO 9** — `Contractor` שמממש `IPayable` **בלי** לרשת מ-`Employee`. שאלו את עצמכם: למה?
-11. **TODO 10** — `Payroll` עם `List<IPayable>`: `Add`, `TotalMonthly`, `PrintSlips`.
-12. **TODO 12** — ב-`Program.cs`: צרו את העובדים והקבלן, הדפיסו תלושים, ואז הדפיסו `Describe()` רק לעובדים (`is Employee e`).
+## Acceptance criteria
 
-## קריטריוני קבלה
+- [ ] `new Shape()` does not compile (the class is abstract).
+- [ ] `Triangle(1, 1, 10)` throws `ArgumentException`; `Triangle(3, 4, 5)` has an area of 6.
+- [ ] `Square(2)` prints `Square: area=4.00, perimeter=8.00` — without rewriting `Area()` in Square.
+- [ ] `Yossi` (₪80/hour, 170 hours) gets 14,000 (160×80 + 10×80×1.5).
+- [ ] `Noa` (360,000 annual + 2,000 bonus) gets 32,000.
+- [ ] `Payroll` accepts both a `Contractor` and an `Employee` in the same list, and the grand total is correct (78,000 with the sample data).
+- [ ] `PaySlip()` is not implemented in any class — only in the interface.
+- [ ] The contractor does not appear in the `Describe()` loop.
 
-- [ ] `new Shape()` לא מתקמפל (המחלקה אבסטרקטית).
-- [ ] `Triangle(1, 1, 10)` זורק `ArgumentException`; `Triangle(3, 4, 5)` נותן שטח 6.
-- [ ] `Square(2)` מדפיס `Square: area=4.00, perimeter=8.00` — בלי לכתוב `Area()` מחדש ב-Square.
-- [ ] `Yossi` (80 ₪/שעה, 170 שעות) מקבל 14,000 (160×80 + 10×80×1.5).
-- [ ] `Noa` (360,000 שנתי + 2,000 בונוס) מקבלת 32,000.
-- [ ] `Payroll` מקבל גם `Contractor` וגם `Employee` באותה רשימה, והסכום הכולל נכון (78,000 עם הנתונים שבדוגמה).
-- [ ] `PaySlip()` לא מומש באף מחלקה — רק בממשק.
-- [ ] בלולאת `Describe()` הקבלן לא מופיע.
+## Bonus
 
-## בונוס
+- A `switch` with pattern matching that classifies each `IPayable` as: "senior manager" (more than one direct report), "manager", "hourly with overtime", "regular employee", "external". Pay attention to the order of the cases.
+- Add `interface IDrawable { void Draw(); }` with an ASCII implementation for `Rectangle` and `Square` only — a shape can implement several interfaces.
+- `Payroll.Employees` — a property that returns only the employees (`OfType<Employee>()`).
 
-- `switch` עם pattern matching שמסווג כל `IPayable` ל: "senior manager" (יותר מכפוף אחד), "manager", "hourly with overtime", "regular employee", "external". שימו לב לסדר ה-cases.
-- הוסיפו `interface IDrawable { void Draw(); }` ומימוש ASCII ל-`Rectangle` ו-`Square` בלבד — צורה יכולה לממש כמה ממשקים.
-- `Payroll.Employees` — property שמחזיר רק את העובדים (`OfType<Employee>()`).
+## Hints
 
-## רמזים
-
-- primary constructor שמעביר ל-base: `class Square(double side) : Rectangle(side, side)`.
-- default member בממשק: `string PaySlip() => $"...";` — פשוט גוף בתוך הממשק.
-- כדי לקרוא ל-`PaySlip()` על `SalariedEmployee` צריך משתנה מטיפוס `IPayable`.
-- `Math.Min` / `Math.Max` עוזרים לחשב שעות רגילות/נוספות בלי `if`.
-
-</div>
+- A primary constructor that passes values to the base: `class Square(double side) : Rectangle(side, side)`.
+- A default member in an interface: `string PaySlip() => $"...";` — just a body inside the interface.
+- To call `PaySlip()` on a `SalariedEmployee` you need a variable of type `IPayable`.
+- `Math.Min` / `Math.Max` help you compute regular/overtime hours without an `if`.

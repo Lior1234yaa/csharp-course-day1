@@ -1,12 +1,12 @@
-// Day1.Lab4.Starter — בנק "עמיד": חריגות, ולידציה, דיבוג
-// התוכנית מתקמפלת ורצה — אבל מכילה לפחות 8 באגים. מצאו ותקנו אותם (ראו README).
+// Day1.Lab4.Starter — A "robust" bank: exceptions, validation, debugging
+// The program compiles and runs — but contains at least 8 bugs. Find and fix them (see the README).
 //
-// פקודות (שורה אחת לכל פקודה, או קובץ דרך stdin):
+// Commands (one command per line, or a file via stdin):
 //   open <id> <owner>      deposit <id> <amount>     withdraw <id> <amount>
 //   transfer <from> <to> <amount>     show <id>     list     quit
 using Day1.Lab4;
 
-var log = new TransactionLog("transactions.log");   // BUG? מתי הקובץ נסגר ומתרוקן לדיסק?
+var log = new TransactionLog("transactions.log");   // BUG? When is the file closed and flushed to disk?
 var bank = new Bank(log);
 int processed = 0, failed = 0;
 
@@ -33,7 +33,7 @@ while (true)
                 Console.WriteLine($"opened {acc.Id} for {acc.Owner}");
                 break;
             case "deposit":
-                // TODO B: החליפו את decimal.Parse ב-TryParse והדפיסו הודעה ידידותית לקלט לא מספרי
+                // TODO B: Replace decimal.Parse with TryParse and print a friendly message for non-numeric input
                 bank.Deposit(parts[1], decimal.Parse(parts[2]));
                 Console.WriteLine($"ok, balance = {bank.Get(parts[1]).Balance:N2}");
                 break;
@@ -64,7 +64,7 @@ while (true)
         Console.WriteLine($"error: {ex.Message}");
         failed++;
     }
-    // TODO C: מה קורה עם IndexOutOfRangeException כשחסר פרמטר? ועם FormatException? הוסיפו טיפול.
+    // TODO C: What happens with IndexOutOfRangeException when a parameter is missing? And with FormatException? Add handling.
 }
 
 Console.WriteLine($"processed={processed}, failed={failed}, log lines={log.Lines}");

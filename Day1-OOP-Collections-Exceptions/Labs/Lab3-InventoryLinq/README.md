@@ -1,76 +1,68 @@
-<div dir="rtl">
+# Lab 3 — Inventory: Dictionary, HashSet, LINQ, Delegates and Events (60 minutes)
 
-# Lab 3 — מלאי: Dictionary, HashSet, LINQ, delegates ואירועים (60 דקות)
+## Goal
 
-## מטרה
+Build a small inventory-management module that uses the "right" tool for each job: a `Dictionary` for lookup by SKU, a `HashSet` for categories, `Func`/`Action` parameters so you can write one flexible method instead of ten, a `LowStock` event that separates "what happened" from "who reacts", and LINQ reports that are pure functions.
 
-לבנות מודול ניהול מלאי קטן שמשתמש בכלים "הנכונים" לכל צורך: `Dictionary` לחיפוש לפי SKU, `HashSet` לקטגוריות, `Func`/`Action` כפרמטרים כדי לכתוב מתודה אחת גמישה במקום עשר, אירוע `LowStock` שמפריד בין "מה קרה" ל-"מי מגיב", ודוחות LINQ שהם פונקציות טהורות.
+## What you need to know first
 
-## מה צריך לדעת לפני
+Modules 04 and 05. Labs 1–2 are recommended.
 
-מודולים 04 ו-05. Lab 1–2 מומלצים.
-
-## התחלה
-
-<div dir="ltr">
+## Getting started
 
 ```bash
 cd Labs/Lab3-InventoryLinq/Starter
 dotnet run
 ```
 
-</div>
+`Models.cs` (the `Product` record, `StockItem`, `LowStockEventArgs`) and `Program.cs` are already written. Your work is in `Inventory.cs` and `Reports.cs`.
 
-`Models.cs` (record `Product`, `StockItem`, `LowStockEventArgs`) ו-`Program.cs` כבר כתובים. עבודתכם ב-`Inventory.cs` ו-`Reports.cs`.
+## Steps
 
-## שלבים
+### Step 1 — `Inventory` (25 min)
 
-### שלב 1 — `Inventory` (25 דק')
-
-1. **TODO 1** — שדות: `Dictionary<string, StockItem>` ו-`HashSet<string>`, שניהם עם `StringComparer.OrdinalIgnoreCase`.
+1. **TODO 1** — Fields: a `Dictionary<string, StockItem>` and a `HashSet<string>`, both with `StringComparer.OrdinalIgnoreCase`.
 2. **TODO 2** — `public event EventHandler<LowStockEventArgs>? LowStock;`
-3. **TODO 3** — `Items` ו-`Categories` (חשיפה לקריאה בלבד).
-4. **TODO 4–6** — `Add` (SKU כפול → חריגה), `Get` (לא קיים → `KeyNotFoundException`), `Receive`.
-5. **TODO 7** — `Sell`: בדיקת כמות, הפחתה, ואם `IsLow` — הפעלת האירוע. אל תשכחו `?.Invoke`.
-6. **TODO 8** — `Find(Func<StockItem, bool>)` — שורה אחת עם `Where`.
+3. **TODO 3** — `Items` and `Categories` (read-only exposure).
+4. **TODO 4–6** — `Add` (duplicate SKU → exception), `Get` (missing → `KeyNotFoundException`), `Receive`.
+5. **TODO 7** — `Sell`: check the quantity, subtract it, and if `IsLow` — raise the event. Don't forget `?.Invoke`.
+6. **TODO 8** — `Find(Func<StockItem, bool>)` — one line with `Where`.
 7. **TODO 9** — `ApplyToCategory(string, Action<StockItem>)`.
 
-### שלב 2 — `Reports` (20 דק')
+### Step 2 — `Reports` (20 min)
 
 8. **TODO 10** — `TotalValue` (`Sum`).
-9. **TODO 11** — `ByCategory` — `GroupBy` + `Select` ל-`CategorySummary` + `OrderByDescending`.
+9. **TODO 11** — `ByCategory` — `GroupBy` + `Select` into `CategorySummary` + `OrderByDescending`.
 10. **TODO 12** — `TopByValue` (`OrderByDescending` + `Take`).
 11. **TODO 13** — `LowStock` (`Where` + `OrderBy` + `ThenBy`).
 12. **TODO 14** — `PriceIndex` (`ToDictionary`).
 
-### שלב 3 — חיבור (15 דק')
+### Step 3 — Wiring it up (15 min)
 
-13. **TODO 16** — ב-`Program.cs`: הירשמו ל-`LowStock` עם lambda שמדפיסה אזהרה. הריצו ובדקו שהאזהרות מופיעות בזמן המכירות.
+13. **TODO 16** — In `Program.cs`: subscribe to `LowStock` with a lambda that prints a warning. Run the program and check that the warnings appear during the sales.
 
-## קריטריוני קבלה
+## Acceptance criteria
 
-- [ ] `inv.Sell("k-100", 1)` עובד גם באותיות קטנות.
-- [ ] מכירה של Keyboard 8 יחידות (מ-12 ל-4, סף 5) מדפיסה `!! LOW STOCK: Keyboard (4 left, reorder at 5)`.
-- [ ] מכירה של יותר ממה שיש זורקת `InvalidOperationException` עם הודעה שכוללת את הכמות הזמינה — והתוכנית ממשיכה.
-- [ ] `Find(i => i.Product.Price < 50)` מחזיר בדיוק את שלושת הפריטים הזולים (Cable ×2, Mouse Pad).
-- [ ] `ByCategory` ממוין לפי ערך יורד, ו-`Displays` ראשון.
-- [ ] `TopByValue(items, 3)` מחזיר 3 פריטים.
-- [ ] `Reports` לא משנה שום דבר במלאי (אין `set` / `Add` / `Remove` בתוכה).
-- [ ] אין `ToUpper()`/`ToLower()` בקוד — ההשוואה נעשית דרך `StringComparer`.
+- [ ] `inv.Sell("k-100", 1)` works even in lowercase.
+- [ ] Selling 8 Keyboards (from 12 down to 4, threshold 5) prints `!! LOW STOCK: Keyboard (4 left, reorder at 5)`.
+- [ ] Selling more than is in stock throws `InvalidOperationException` with a message that includes the available quantity — and the program keeps running.
+- [ ] `Find(i => i.Product.Price < 50)` returns exactly the three cheap items (2 × Cable, Mouse Pad).
+- [ ] `ByCategory` is sorted by value in descending order, with `Displays` first.
+- [ ] `TopByValue(items, 3)` returns 3 items.
+- [ ] `Reports` does not change anything in the inventory (no `set` / `Add` / `Remove` inside it).
+- [ ] There is no `ToUpper()`/`ToLower()` in the code — comparison is done through `StringComparer`.
 
-## בונוס
+## Bonus
 
-- **TODO 15** — `SkusInBoth(a, b)` עם `HashSet.IntersectWith`.
-- מנוי שני לאירוע שאוסף רשימת הזמנות (`List<string>`), והדפסתה בסוף.
-- הדגימו deferred execution: הגדירו `var low = Reports.LowStock(inv.Items);` **לפני** מכירה, הדפיסו **אחרי** — מה קורה? ומה אם מוסיפים `.ToList()`?
-- כתבו אחד מהדוחות ב-query syntax (`from ... where ... select`).
+- **TODO 15** — `SkusInBoth(a, b)` using `HashSet.IntersectWith`.
+- A second event subscriber that collects a list of reorders (`List<string>`), printed at the end.
+- Demonstrate deferred execution: define `var low = Reports.LowStock(inv.Items);` **before** a sale and print it **after** — what happens? And what if you add `.ToList()`?
+- Write one of the reports in query syntax (`from ... where ... select`).
 
-## רמזים
+## Hints
 
-- `Dictionary.TryGetValue(key, out var item)` — חיפוש בלי חריגה.
-- `new Dictionary<string, StockItem>(StringComparer.OrdinalIgnoreCase)` — מפתחות לא תלויי רישיות.
+- `Dictionary.TryGetValue(key, out var item)` — lookup without an exception.
+- `new Dictionary<string, StockItem>(StringComparer.OrdinalIgnoreCase)` — case-insensitive keys.
 - `LowStock?.Invoke(this, new LowStockEventArgs(item));`
 - `items.GroupBy(i => i.Product.Category).Select(g => new CategorySummary(g.Key, g.Count(), g.Sum(...), g.Sum(...)))`.
-- ב-`ApplyToCategory`, קראו ל-`.ToList()` לפני ה-`foreach`. אם ה-action משנה את האוסף בזמן המעבר עליו, בלי "צילום המצב" הזה תקבלו `Collection was modified` (ראו deferred execution ב-Notes/05).
-
-</div>
+- In `ApplyToCategory`, call `.ToList()` before the `foreach`. If the action changes the collection while you are iterating over it, without this "snapshot" you will get `Collection was modified` (see deferred execution in Notes/05).

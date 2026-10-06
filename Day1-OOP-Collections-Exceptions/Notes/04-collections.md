@@ -1,62 +1,50 @@
-<div dir="rtl">
+# Module 04 — Collections, Generics and Efficient Data Management
 
-# מודול 04 — אוספים, גנריקה וניהול נתונים יעיל
+Almost every program manages "a lot of something": a list of books, inventory by SKU, a queue of tasks. .NET ships with a rich set of collections in `System.Collections.Generic`, and each one is good at something different. In this module we'll learn the important ones, understand **how to choose** (the Big-O table is the tool), write our own generic class, and talk about how to expose collections to the outside world without losing control.
 
-כמעט כל תוכנית מנהלת "הרבה מ-משהו": רשימת ספרים, מלאי לפי מק"ט, תור של משימות. .NET מגיע עם סט אוספים עשיר ב-`System.Collections.Generic`, וכל אחד מהם טוב למשהו אחר. במודול הזה נלמד את החשובים, נבין **איך לבחור** (הטבלה עם ה-Big-O היא הכלי), נכתוב מחלקה גנרית משלנו, ונדבר על איך לחשוף אוספים החוצה בלי לאבד שליטה.
+## Arrays
 
-## מערכים
-
-מערך הוא בלוק זיכרון רציף בגודל **קבוע**. הוא הכי מהיר לגישה לפי אינדקס, אבל אי אפשר להוסיף איברים.
-
-<div dir="ltr">
+An array is a contiguous block of memory of **fixed** size. It is the fastest for access by index, but you can't add elements to it.
 
 ```csharp
 int[] scores = [90, 75, 88];             // collection expression (C# 12)
-int[] zeros = new int[5];                // 5 אפסים
-Console.WriteLine(scores[0]);            // 90 — אינדקס מתחיל ב-0
-Console.WriteLine(scores[^1]);           // 88 — מהסוף
-int[] middle = scores[1..];              // range: מאינדקס 1 עד הסוף
+int[] zeros = new int[5];                // 5 zeros
+Console.WriteLine(scores[0]);            // 90 — indexes start at 0
+Console.WriteLine(scores[^1]);           // 88 — from the end
+int[] middle = scores[1..];              // range: from index 1 to the end
 Array.Sort(scores);
 
-int[,] grid = { { 1, 2, 3 }, { 4, 5, 6 } };      // דו-ממדי (מטריצה): 2 שורות, 3 עמודות
+int[,] grid = { { 1, 2, 3 }, { 4, 5, 6 } };      // two-dimensional (matrix): 2 rows, 3 columns
 Console.WriteLine(grid[1, 2]);                   // 6
 Console.WriteLine(grid.GetLength(0));            // 2
 
-int[][] jagged = [[1], [2, 3], [4, 5, 6]];       // "משונן": מערך של מערכים באורכים שונים
+int[][] jagged = [[1], [2, 3], [4, 5, 6]];       // "jagged": an array of arrays of different lengths
 Console.WriteLine(jagged[2].Length);             // 3
 ```
 
-</div>
+A two-dimensional array suits a rectangular matrix (a game board); a jagged array — when each row has a different length. Arrays are reference types: passing one to a method does not copy it.
 
-מערך דו-ממדי מתאים למטריצה מלבנית (לוח משחק); jagged — כשלכל שורה אורך אחר. מערכים הם reference types: העברה למתודה לא מעתיקה אותם.
+## `List<T>` — the dynamic list
 
-## `List<T>` — הרשימה הדינמית
-
-`List<T>` הוא מערך שיודע לגדול. זה האוסף שתשתמשו בו הכי הרבה.
-
-<div dir="ltr">
+`List<T>` is an array that knows how to grow. It's the collection you'll use the most.
 
 ```csharp
 var names = new List<string> { "Dana", "Yossi" };
 names.Add("Noa");
 names.Insert(0, "Avi");
-names.Remove("Yossi");                  // לפי ערך (true/false)
-names.RemoveAt(0);                      // לפי אינדקס
-bool has = names.Contains("Noa");       // O(n) — סריקה
+names.Remove("Yossi");                  // by value (true/false)
+names.RemoveAt(0);                      // by index
+bool has = names.Contains("Noa");       // O(n) — a scan
 int idx = names.IndexOf("Noa");
 names.Sort();
 Console.WriteLine($"{names.Count} items: {string.Join(", ", names)}");
 ```
 
-</div>
+`Count` (not `Length`) is the number of elements; `Capacity` is how much space has been allocated. When the List fills up, it allocates an array twice the size and copies — so if you know in advance how many elements there will be, `new List<int>(capacity: 100_000)` saves allocations.
 
-`Count` (לא `Length`) הוא מספר האיברים; `Capacity` הוא כמה מקום הוקצה. כשה-List מתמלא הוא מקצה מערך כפול ומעתיק — לכן אם יודעים מראש כמה איברים יהיו, `new List<int>(capacity: 100_000)` חוסך הקצאות.
+## `Dictionary<TKey, TValue>` — lookup by key
 
-## `Dictionary<TKey, TValue>` — חיפוש לפי מפתח
-
-מילון ממפה מפתח לערך עם חיפוש בזמן קבוע (בממוצע) — לא משנה אם יש 10 או 10 מיליון איברים. זה **ה**כלי לחיפוש "לפי מזהה".
-
-<div dir="ltr">
+A dictionary maps a key to a value with constant-time lookup (on average) — it doesn't matter whether there are 10 or 10 million elements. It is **the** tool for lookup "by ID".
 
 ```csharp
 var stock = new Dictionary<string, int>
@@ -64,27 +52,23 @@ var stock = new Dictionary<string, int>
     ["apple"] = 10,
     ["banana"] = 0,
 };
-stock["cherry"] = 25;                             // הוספה או עדכון
+stock["cherry"] = 25;                             // add or update
 stock["apple"] += 5;
-if (stock.TryGetValue("kiwi", out int qty)) { }   // חיפוש בטוח — בלי חריגה
+if (stock.TryGetValue("kiwi", out int qty)) { }   // safe lookup — no exception
 bool exists = stock.ContainsKey("apple");
 stock.Remove("banana");
 foreach (var (fruit, count) in stock) Console.WriteLine($"{fruit}: {count}");
 
-var byName = new Dictionary<string, Product>(StringComparer.OrdinalIgnoreCase);   // מפתח לא תלוי רישיות
+var byName = new Dictionary<string, Product>(StringComparer.OrdinalIgnoreCase);   // case-insensitive key
 ```
 
-</div>
-
-`stock["kiwi"]` על מפתח שלא קיים זורק `KeyNotFoundException` — לכן `TryGetValue`. המפתח חייב להיות יציב: אל תשתמשו באובייקט ש-`GetHashCode` שלו משתנה (מודול 03).
+`stock["kiwi"]` on a key that doesn't exist throws `KeyNotFoundException` — hence `TryGetValue`. The key must be stable: don't use an object whose `GetHashCode` changes (module 03).
 
 ## `HashSet<T>`, `Queue<T>`, `Stack<T>`
 
-- **`HashSet<T>`** — קבוצה בלי כפילויות, בדיקת שייכות O(1). "האם כבר ראינו את המזהה הזה?" `Add` מחזיר `false` אם האיבר כבר קיים. פעולות קבוצה: `UnionWith`, `IntersectWith`, `ExceptWith`.
-- **`Queue<T>`** — תור: ראשון נכנס, ראשון יוצא (FIFO). `Enqueue`, `Dequeue`, `Peek`. עיבוד משימות לפי סדר הגעה.
-- **`Stack<T>`** — מחסנית: אחרון נכנס, ראשון יוצא (LIFO). `Push`, `Pop`, `Peek`. Undo, ניווט "אחורה", פרסינג.
-
-<div dir="ltr">
+- **`HashSet<T>`** — a set without duplicates, O(1) membership check. "Have we already seen this ID?" `Add` returns `false` if the element already exists. Set operations: `UnionWith`, `IntersectWith`, `ExceptWith`.
+- **`Queue<T>`** — a queue: first in, first out (FIFO). `Enqueue`, `Dequeue`, `Peek`. Processing tasks in order of arrival.
+- **`Stack<T>`** — a stack: last in, first out (LIFO). `Push`, `Pop`, `Peek`. Undo, "back" navigation, parsing.
 
 ```csharp
 var seen = new HashSet<int>();
@@ -98,51 +82,43 @@ undo.Push("typed a"); undo.Push("bold");
 Console.WriteLine(undo.Pop());      // bold
 ```
 
-</div>
+## `IEnumerable<T>` and `foreach`
 
-## `IEnumerable<T>` ו-`foreach`
+All collections implement `IEnumerable<T>` — the interface that says "you can iterate over me with `foreach`". It's also the type you should accept as a parameter when all the method needs is to iterate over the elements: it will then work with an array, a `List`, a `HashSet`, a LINQ result — anything.
 
-כל האוספים מממשים `IEnumerable<T>` — הממשק שאומר "אפשר לעבור עליי עם `foreach`". זה גם הטיפוס שכדאי לקבל כפרמטר כשכל מה שהמתודה צריכה הוא לעבור על האיברים: היא תעבוד עם מערך, `List`, `HashSet`, תוצאת LINQ — הכל.
-
-אפשר גם לייצר `IEnumerable<T>` בעצמכם עם `yield return` — האיברים מיוצרים **לפי דרישה**, אחד בכל פעם:
-
-<div dir="ltr">
+You can also produce an `IEnumerable<T>` yourself with `yield return` — the elements are produced **on demand**, one at a time:
 
 ```csharp
 static IEnumerable<int> Evens(int max)
 {
     for (int i = 0; i <= max; i += 2)
-        yield return i;                        // "החזר את זה, ותמשיך מכאן בפעם הבאה"
+        yield return i;                        // "return this, and continue from here next time"
 }
 
-foreach (var n in Evens(1_000_000).Take(3)) Console.WriteLine(n);   // רק 3 מחושבים
+foreach (var n in Evens(1_000_000).Take(3)) Console.WriteLine(n);   // only 3 are computed
 ```
 
-</div>
+This is the basis of LINQ's deferred execution (module 05). Important: `IEnumerable<T>` is only "the ability to iterate" — it has no `Count`, indexer or `Add`. If you need those, ask for an `IReadOnlyList<T>` or a `List<T>`.
 
-זהו הבסיס ל-deferred execution של LINQ (מודול 05). חשוב: `IEnumerable<T>` הוא רק "היכולת לעבור" — אין לו `Count`, אינדקס או `Add`. אם צריך אותם, בקשו `IReadOnlyList<T>` או `List<T>`.
+## Generics — code that works for any type
 
-## גנריקה — קוד שעובד לכל טיפוס
+`List<T>` is **generic**: `T` is a placeholder for a type chosen at the point of use. Without generics we would need `IntList`, `StringList`... or a `List` of `object` with casting everywhere (as in .NET 1.0). Generics give you both type safety and performance.
 
-`List<T>` הוא **גנרי**: `T` הוא placeholder לטיפוס שנבחר בשימוש. בלי גנריקה היינו צריכים `IntList`, `StringList`... או `List` של `object` עם casting בכל מקום (כמו ב-.NET 1.0). גנריקה נותנת גם type safety וגם ביצועים.
-
-אפשר לכתוב מחלקות ומתודות גנריות בעצמכם:
-
-<div dir="ltr">
+You can write generic classes and methods yourself:
 
 ```csharp
 interface IEntity { int Id { get; } }
 
-class Repository<T> where T : IEntity            // constraint: T חייב לממש IEntity
+class Repository<T> where T : IEntity            // constraint: T must implement IEntity
 {
     private readonly List<T> _items = [];
-    private readonly Dictionary<int, T> _byId = [];   // אינדקס — חיפוש O(1) לפי Id
+    private readonly Dictionary<int, T> _byId = [];   // index — O(1) lookup by Id
 
     public IReadOnlyList<T> All => _items;
 
     public void Add(T item)
     {
-        if (!_byId.TryAdd(item.Id, item))           // אפשר כי T הוא IEntity
+        if (!_byId.TryAdd(item.Id, item))           // possible because T is an IEntity
             throw new InvalidOperationException($"Id {item.Id} exists");
         _items.Add(item);
     }
@@ -154,77 +130,71 @@ record Customer(int Id, string Name) : IEntity;
 var repo = new Repository<Customer>();
 ```
 
-</div>
+Common constraints: `where T : class` (reference types only), `where T : struct`, `where T : new()` (has a parameterless constructor), `where T : IComparable<T>` (can be compared), `where T : notnull`. Without a constraint, all you can do with `T` is what you can do with `object`.
 
-Constraints נפוצים: `where T : class` (רק reference types), `where T : struct`, `where T : new()` (יש בנאי ריק), `where T : IComparable<T>` (אפשר להשוות), `where T : notnull`. בלי constraint, כל מה שאפשר לעשות עם `T` הוא מה שאפשר לעשות עם `object`.
+A generic method: `static T Max<T>(T a, T b) where T : IComparable<T> => a.CompareTo(b) >= 0 ? a : b;` — the compiler infers `T` from the arguments.
 
-מתודה גנרית: `static T Max<T>(T a, T b) where T : IComparable<T> => a.CompareTo(b) >= 0 ? a : b;` — המהדר מסיק את `T` מהארגומנטים.
+## Choosing the right collection
 
-## בחירת האוסף הנכון
-
-| צורך | אוסף | גישה לפי אינדקס | חיפוש לפי ערך/מפתח | הוספה בסוף | הסרה |
+| Need | Collection | Access by index | Lookup by value/key | Add at end | Remove |
 |---|---|---|---|---|---|
-| גודל קבוע, מהיר | `T[]` | O(1) | O(n) | — | — |
-| רשימה כללית עם סדר | `List<T>` | O(1) | O(n) | O(1)* | O(n) |
-| מפתח → ערך | `Dictionary<K,V>` | — | O(1) | O(1)* | O(1) |
-| ייחודיות / שייכות | `HashSet<T>` | — | O(1) | O(1)* | O(1) |
-| FIFO | `Queue<T>` | — | — | O(1)* | O(1) מהראש |
-| LIFO | `Stack<T>` | — | — | O(1)* | O(1) מהסוף |
-| מיון תמידי לפי מפתח | `SortedDictionary<K,V>` | — | O(log n) | O(log n) | O(log n) |
+| Fixed size, fast | `T[]` | O(1) | O(n) | — | — |
+| General ordered list | `List<T>` | O(1) | O(n) | O(1)* | O(n) |
+| Key → value | `Dictionary<K,V>` | — | O(1) | O(1)* | O(1) |
+| Uniqueness / membership | `HashSet<T>` | — | O(1) | O(1)* | O(1) |
+| FIFO | `Queue<T>` | — | — | O(1)* | O(1) from the front |
+| LIFO | `Stack<T>` | — | — | O(1)* | O(1) from the top |
+| Always sorted by key | `SortedDictionary<K,V>` | — | O(log n) | O(log n) | O(log n) |
 
-`*` — amortized: לפעמים יש הקצאה מחדש, אבל בממוצע קבוע.
+`*` — amortized: occasionally there is a reallocation, but on average it's constant.
 
-השאלות שמכריעות: האם צריך סדר? האם צריך חיפוש לפי מפתח? האם יש כפילויות? כמה איברים? `List<T>` עם `Contains` בלולאה על 100,000 איברים = 10 מיליארד השוואות. `HashSet` = 100,000. זה ההבדל בין שנייה לדקות.
+The deciding questions: Do you need order? Do you need lookup by key? Are there duplicates? How many elements? A `List<T>` with `Contains` in a loop over 100,000 elements = 10 billion comparisons. A `HashSet` = 100,000. That's the difference between a second and minutes.
 
-## Immutability ו-`IReadOnlyList<T>`
+## Immutability and `IReadOnlyList<T>`
 
-כשמחלקה מחזיקה `List<T>` פרטי וחושפת אותו כ-`public List<T> Items { get; }`, כל אחד יכול לקרוא `obj.Items.Clear()` — האנקפסולציה נשברה. הפתרון: לחשוף **ממשק לקריאה בלבד**.
-
-<div dir="ltr">
+When a class holds a private `List<T>` and exposes it as `public List<T> Items { get; }`, anyone can call `obj.Items.Clear()` — encapsulation is broken. The solution: expose a **read-only interface**.
 
 ```csharp
 class Library
 {
     private readonly List<Book> _books = [];
-    public IReadOnlyList<Book> Books => _books;       // רואים, לא משנים
-    public void Add(Book b) { /* ולידציה */ _books.Add(b); }
+    public IReadOnlyList<Book> Books => _books;       // can see, can't change
+    public void Add(Book b) { /* validation */ _books.Add(b); }
 }
 ```
 
-</div>
+`List<T>` implements `IReadOnlyList<T>`, so there is no copying — just a restricted API. Other options: `IReadOnlyCollection<T>`, `IReadOnlyDictionary<K,V>`, `_books.AsReadOnly()` (a wrapper), and `ImmutableList<T>` from `System.Collections.Immutable` when you need a collection that truly cannot be changed (every "change" returns a new collection). Arrays and records are also part of the story: a `record` with an `IReadOnlyList<T>` is a fully immutable piece of data.
 
-`List<T>` מממש `IReadOnlyList<T>`, אז אין העתקה — רק הגבלת ה-API. אפשרויות נוספות: `IReadOnlyCollection<T>`, `IReadOnlyDictionary<K,V>`, `_books.AsReadOnly()` (עוטף), ו-`ImmutableList<T>` מ-`System.Collections.Immutable` כשצריך אוסף שבאמת לא ניתן לשינוי (כל "שינוי" מחזיר אוסף חדש). מערכים ו-records גם הם חלק מהסיפור: `record` עם `IReadOnlyList<T>` הוא נתון בלתי-משתנה לחלוטין.
+## Efficient data management
 
-## ניהול נתונים יעיל
+A few principles that save a lot of runtime — and bugs:
 
-כמה עקרונות שחוסכים הרבה זמן ריצה — ובאגים:
+1. **In-memory index**: if you look things up by key frequently, keep a `Dictionary` alongside the `List` (as in `Repository<T>` above). Memory is cheap; scans are expensive.
+2. **Capacity**: `new List<T>(n)` / `new Dictionary<K,V>(n)` when you know the size. Saves doublings and copies.
+3. **Don't copy for no reason**: `ToList()` on every line creates a copy. Use it only when you need a "snapshot" or when you iterate over the collection more than once.
+4. **`StringBuilder`** for building a string in a loop — `+=` on a string creates a new string every time.
+5. **`Span<T>`** — a "window" over an array (or part of one) without copying. Useful for high-performance text/binary processing: `data.AsSpan(2, 4)`. You won't need it day to day, but it's worth knowing it's there — and that many .NET APIs accept it.
+6. **Measure before optimizing**: `Stopwatch` or BenchmarkDotNet. Most code doesn't need optimization — it needs the right collection.
 
-1. **אינדקס בזיכרון**: אם מחפשים לפי מפתח לעיתים קרובות, החזיקו `Dictionary` ליד ה-`List` (כמו ב-`Repository<T>` למעלה). זיכרון זול; סריקות יקרות.
-2. **Capacity**: `new List<T>(n)` / `new Dictionary<K,V>(n)` כשיודעים את הגודל. חוסך הכפלות והעתקות.
-3. **אל תעתיקו סתם**: `ToList()` בכל שורה יוצר עותק. השתמשו בו רק כשצריך "צילום מצב" או כשעוברים על האוסף יותר מפעם אחת.
-4. **`StringBuilder`** לבניית מחרוזת בלולאה — `+=` על string יוצר מחרוזת חדשה בכל פעם.
-5. **`Span<T>`** — "חלון" על מערך (או חלק ממנו) בלי העתקה. שימושי בעיבוד טקסט/בינארי בביצועים גבוהים: `data.AsSpan(2, 4)`. לא תצטרכו אותו ביום-יום, אבל כדאי לדעת שהוא שם — ושהרבה מ-API של .NET מקבל אותו.
-6. **מדדו לפני שמייעלים**: `Stopwatch` או BenchmarkDotNet. רוב הקוד לא צריך אופטימיזציה — צריך אוסף נכון.
+## Common mistakes
 
-## טעויות נפוצות
+- **Modifying a collection inside a `foreach`** over it — `InvalidOperationException: Collection was modified`. Iterate over a copy (`.ToList()`) or use `RemoveAll(predicate)`.
+- **`List.Contains` / `IndexOf` in a loop** over large collections — O(n²). Use `HashSet`/`Dictionary`.
+- **`dict[key]` without checking** — `KeyNotFoundException`. Use `TryGetValue` / `GetValueOrDefault`.
+- **Exposing a public `List<T>`** — anyone can empty it. Use `IReadOnlyList<T>`.
+- **A key that changes** in a `Dictionary`/`HashSet` — the element "disappears". Use immutable keys (string, int, record).
+- **An `IEnumerable` consumed twice** — if it is a LINQ result, the query will run twice (and may sometimes give different results). Call `ToList()` once.
+- **LINQ's `Count()` instead of a List's `Count`** — the former may scan the entire collection.
 
-- **שינוי אוסף בתוך `foreach`** עליו — `InvalidOperationException: Collection was modified`. עברו על עותק (`.ToList()`) או השתמשו ב-`RemoveAll(predicate)`.
-- **`List.Contains` / `IndexOf` בלולאה** על אוספים גדולים — O(n²). `HashSet`/`Dictionary`.
-- **`dict[key]` בלי לבדוק** — `KeyNotFoundException`. `TryGetValue` / `GetValueOrDefault`.
-- **חשיפת `List<T>` ציבורי** — כל אחד יכול לרוקן אותו. `IReadOnlyList<T>`.
-- **מפתח שמשתנה** ב-`Dictionary`/`HashSet` — האיבר "נעלם". מפתחות immutable (string, int, record).
-- **`IEnumerable` שנצרך פעמיים** — אם הוא תוצאת LINQ, השאילתה תרוץ פעמיים (ולפעמים תיתן תוצאות שונות). `ToList()` פעם אחת.
-- **`Count()` של LINQ במקום `Count`** של List — הראשון עלול לסרוק את כל האוסף.
+## Summary
 
-## לסיכום
+- An array for fixed size; `List<T>` for a general list; `Dictionary` for lookup by key; `HashSet` for uniqueness; `Queue`/`Stack` for processing order.
+- `IEnumerable<T>` is the common denominator — accept it as a parameter, produce it with `yield`.
+- Generics (`Repository<T> where T : IEntity`) = one piece of code for all types, with type safety.
+- The Big-O table is the tool for choosing. Repeated lookup = an index (`Dictionary`).
+- Expose collections as `IReadOnlyList<T>`; set capacity when you know it; don't copy for no reason.
 
-- מערך לגודל קבוע; `List<T>` לרשימה כללית; `Dictionary` לחיפוש לפי מפתח; `HashSet` לייחודיות; `Queue`/`Stack` לסדר עיבוד.
-- `IEnumerable<T>` הוא המכנה המשותף — קבלו אותו כפרמטר, ייצרו אותו עם `yield`.
-- גנריקה (`Repository<T> where T : IEntity`) = קוד אחד לכל הטיפוסים, עם בטיחות טיפוסים.
-- הטבלה של Big-O היא הכלי לבחירה. חיפוש חוזר = אינדקס (`Dictionary`).
-- חשפו אוספים כ-`IReadOnlyList<T>`; קבעו capacity כשיודעים; אל תעתיקו סתם.
-
-## קריאה נוספת
+## Further reading
 
 - [Collections (C#)](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/collections)
 - [Arrays](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/arrays)
@@ -233,5 +203,3 @@ class Library
 - [Iterators (yield)](https://learn.microsoft.com/dotnet/csharp/iterators)
 - [Selecting a collection class](https://learn.microsoft.com/dotnet/standard/collections/selecting-a-collection-class)
 - [Memory<T> and Span<T> usage guidelines](https://learn.microsoft.com/dotnet/standard/memory-and-spans/memory-t-usage-guidelines)
-
-</div>

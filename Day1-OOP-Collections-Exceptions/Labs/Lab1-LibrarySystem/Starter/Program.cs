@@ -1,5 +1,5 @@
-// Day1.Lab1.Starter — מערכת ספרייה
-// השלימו את ה-TODO בקבצים Book.cs ו-Library.cs. התפריט כאן כבר מוכן.
+// Day1.Lab1.Starter — Library system
+// Complete the TODOs in Book.cs and Library.cs. The menu here is already done.
 using Day1.Lab1;
 
 var library = new Library();
@@ -12,7 +12,7 @@ while (true)
     Console.WriteLine("1) List all   2) Search title   3) Search author   4) Borrow   5) Return   6) Available   0) Exit");
     Console.Write("> ");
     var choice = Console.ReadLine();
-    if (choice is null || choice == "0") break;   // EOF או יציאה
+    if (choice is null || choice == "0") break;   // EOF or exit
 
     try
     {
@@ -54,7 +54,7 @@ Console.WriteLine("Bye!");
 
 static void Seed(Library library)
 {
-    // TODO 12: לאחר שסיימתם את Book/Library, הסירו את ההערה מהשורות הבאות:
+    // TODO 12: Once you have finished Book/Library, uncomment the following lines:
     // library.AddBook(new Book("978-0132350884", "Clean Code", "Robert C. Martin", 2008));
     // library.AddBook(new Book("978-0201633610", "Design Patterns", "Erich Gamma", 1994));
     // library.AddBook(new Book("978-0135957059", "The Pragmatic Programmer", "David Thomas", 2019));

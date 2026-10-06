@@ -1,9 +1,9 @@
 namespace Day1.Lab3;
 
-/// <summary>מוצר בקטלוג — נתונים בלתי משתנים, לכן record.</summary>
+/// <summary>A product in the catalog — immutable data, hence a record.</summary>
 public record Product(string Sku, string Name, string Category, decimal Price);
 
-/// <summary>פריט מלאי: מוצר + כמות במחסן + סף הזמנה מחדש.</summary>
+/// <summary>A stock item: a product + the quantity in the warehouse + the reorder threshold.</summary>
 public class StockItem(Product product, int quantity, int reorderLevel)
 {
     public Product Product { get; } = product;
@@ -17,7 +17,7 @@ public class StockItem(Product product, int quantity, int reorderLevel)
         $"{Product.Sku,-6} {Product.Name,-18} {Product.Category,-12} {Product.Price,8:N2} x{Quantity,4}  = {Value,10:N2}{(IsLow ? "  LOW" : "")}";
 }
 
-/// <summary>נתוני האירוע "מלאי נמוך".</summary>
+/// <summary>Data for the "low stock" event.</summary>
 public class LowStockEventArgs(StockItem item) : EventArgs
 {
     public StockItem Item { get; } = item;

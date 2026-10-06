@@ -1,14 +1,14 @@
 // =====================================================================
-// Day1.Demo.Exceptions — חריגות, ניקוי משאבים ודיבוג
-// מה הדמו מראה:
-//   * try / catch / finally, סדר catch (ספציפי לפני כללי)
-//   * exception filters (when), חריגה מותאמת אישית עם נתונים
-//   * throw; מול throw ex; (שמירה על ה-stack trace)
+// Day1.Demo.Exceptions — exceptions, resource cleanup and debugging
+// What the demo shows:
+//   * try / catch / finally, catch order (specific before general)
+//   * exception filters (when), a custom exception with data
+//   * throw; vs throw ex; (preserving the stack trace)
 //   * using / IDisposable (using declaration)
 //   * guard clauses: ArgumentException.ThrowIfNullOrEmpty, ArgumentOutOfRangeException.ThrowIfNegative
-//   * TryParse pattern במקום חריגות לזרימה רגילה
-//   * Debug.Assert ו-Debug.WriteLine (רצים רק ב-Debug)
-// הרצה:  dotnet run   (או dotnet run -c Release כדי לראות ש-Debug.Assert נעלם)
+//   * the TryParse pattern instead of exceptions for normal flow
+//   * Debug.Assert and Debug.WriteLine (run only in Debug)
+// Run:  dotnet run   (or dotnet run -c Release to see that Debug.Assert disappears)
 // =====================================================================
 using System.Diagnostics;
 
@@ -64,9 +64,9 @@ Console.WriteLine("\n=== 4. using / IDisposable ===");
 using (var r1 = new Resource("A"))
 {
     Console.WriteLine("  working with A");
-}   // Dispose נקרא כאן — גם אם הייתה חריגה
+}   // Dispose is called here — even if there was an exception
 {
-    using var r2 = new Resource("B");   // using declaration — Dispose בסוף הבלוק
+    using var r2 = new Resource("B");   // using declaration — Dispose at the end of the block
     Console.WriteLine("  working with B");
 }
 try
@@ -93,7 +93,7 @@ Console.WriteLine($"  Parse('abc') would throw: {SafeParseMessage("abc")}");
 
 Console.WriteLine("\n=== 7. Debug.Assert / Debug.WriteLine ===");
 int total = Sum([1, 2, 3]);
-Debug.Assert(total == 6, "Sum is wrong!");   // ב-Release השורה נמחקת
+Debug.Assert(total == 6, "Sum is wrong!");   // in Release this line is removed
 Debug.WriteLine("this line appears only in the Debug output window");
 Console.WriteLine($"  total={total} (Assert passed in Debug; Assert compiled away in Release)");
 Console.WriteLine("\nDone.");
@@ -104,9 +104,9 @@ static void Level1(bool rethrowCorrectly)
     try { Level2(); }
     catch (Exception ex)
     {
-        if (rethrowCorrectly) throw;   // שומר את ה-stack trace המקורי
-#pragma warning disable CA2200 // מדגימים בכוונה את הטעות
-        else throw ex;                 // מוחק! ה-stack מתחיל מכאן (CA2200)
+        if (rethrowCorrectly) throw;   // preserves the original stack trace
+#pragma warning disable CA2200 // deliberately demonstrating the mistake
+        else throw ex;                 // erases it! the stack starts here (CA2200)
 #pragma warning restore CA2200
     }
 }

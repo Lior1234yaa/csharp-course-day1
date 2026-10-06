@@ -1,9 +1,9 @@
 namespace Day1.Lab4;
 
-// TODO A: היררכיית חריגות מותאמות:
-//   BankException : Exception                      (בסיס)
-//   AccountNotFoundException : BankException       (עם property AccountId)
-//   InsufficientFundsException : BankException     (עם Requested, Available, Shortfall)
-//   InvalidAmountException : BankException         (עם Amount)
-// כרגע יש רק מחלקה אחת כללית — החליפו אותה בהיררכיה.
+// TODO A: A hierarchy of custom exceptions:
+//   BankException : Exception                      (base)
+//   AccountNotFoundException : BankException       (with an AccountId property)
+//   InsufficientFundsException : BankException     (with Requested, Available, Shortfall)
+//   InvalidAmountException : BankException         (with Amount)
+// Right now there is only one general class — replace it with the hierarchy.
 public class BankException(string message) : Exception(message);

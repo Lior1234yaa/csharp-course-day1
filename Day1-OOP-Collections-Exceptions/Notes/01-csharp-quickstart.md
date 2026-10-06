@@ -1,12 +1,8 @@
-<div dir="rtl">
+# Module 01 — C# Warm-up: Everything You Need to Get Started
 
-# מודול 01 — חימום C#: כל מה שצריך כדי להתחיל
+Before diving into object-oriented programming, let's take a quick tour of "the language itself": what a C# program looks like, which types exist, how to write conditions, loops and methods, and what the `?` that appears after types means. If you have already programmed in another language (Java, JavaScript, Python), most of this will look familiar — pay special attention to the difference between value and reference types and to nullable reference types, because that is where most beginner bugs hide.
 
-לפני שצוללים לתכנות מונחה-עצמים, נעבור במהירות על "השפה עצמה": איך נראית תוכנית C#, אילו טיפוסים יש, איך כותבים תנאים, לולאות ומתודות, ומה זה `?` שמופיע אחרי טיפוסים. אם כבר תכנתתם בשפה אחרת (Java, JavaScript, Python), רוב הדברים ייראו מוכרים — שימו לב במיוחד להבדל בין טיפוסי ערך להפניה ול-nullable reference types, כי שם מסתתרים רוב הבאגים של מתחילים.
-
-## תוכנית ראשונה: `Program.cs` ו-top-level statements
-
-<div dir="ltr">
+## First program: `Program.cs` and top-level statements
 
 ```bash
 dotnet new console -n HelloApp
@@ -14,23 +10,15 @@ cd HelloApp
 dotnet run
 ```
 
-</div>
-
-`dotnet new` יוצר שני קבצים: `HelloApp.csproj` (הגדרות הפרויקט — איזו גרסת .NET, אילו חבילות) ו-`Program.cs`. מאז C# 9 אין צורך במחלקה `Program` ובמתודה `Main` — כותבים את הקוד ישירות:
-
-<div dir="ltr">
+`dotnet new` creates two files: `HelloApp.csproj` (the project settings — which .NET version, which packages) and `Program.cs`. Since C# 9 you don't need a `Program` class and a `Main` method — you write the code directly:
 
 ```csharp
 Console.WriteLine("Hello, .NET!");
 ```
 
-</div>
+This is called **top-level statements**. The compiler wraps the code in `Main` for us. The only rule: type declarations (classes, records) must come **after** all the statements. In larger projects you will still see `static void Main(string[] args)` — it's the same thing, just explicit.
 
-זה נקרא **top-level statements**. המהדר עוטף את הקוד ב-`Main` בשבילנו. הכלל היחיד: הצהרות של טיפוסים (מחלקות, records) חייבות לבוא **אחרי** כל ההוראות. בפרויקטים גדולים עדיין נפגוש `static void Main(string[] args)` — זה אותו דבר, רק מפורש.
-
-ה-`.csproj` שלנו נראה כך:
-
-<div dir="ltr">
+Our `.csproj` looks like this:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -43,100 +31,84 @@ Console.WriteLine("Hello, .NET!");
 </Project>
 ```
 
-</div>
+`ImplicitUsings` automatically imports `System`, `System.Collections.Generic`, `System.Linq` and more — which is why you won't see `using System;` at the top of the files. We'll explain `Nullable` later on.
 
-`ImplicitUsings` מייבא אוטומטית `System`, `System.Collections.Generic`, `System.Linq` ועוד — לכן לא נראה `using System;` בראש הקבצים. `Nullable` נסביר בהמשך.
+## Variables and basic types
 
-## משתנים וטיפוסים בסיסיים
-
-C# היא שפה עם **טיפוסים סטטיים**: לכל משתנה יש טיפוס שנקבע בזמן הקומפילציה.
-
-<div dir="ltr">
+C# is a **statically typed** language: every variable has a type that is fixed at compile time.
 
 ```csharp
-int age = 30;                 // שלם 32 ביט
-long big = 10_000_000_000;    // שלם 64 ביט (קו תחתון לקריאות)
-float ratio = 0.75f;          // נקודה צפה 32 ביט — כ-7 ספרות מדויקות (סיומת f)
-double price = 19.90;         // נקודה צפה 64 ביט — כ-15 ספרות (ברירת המחדל)
-decimal money = 19.90m;       // עשרוני מדויק — לכסף! (סיומת m)
+int age = 30;                 // 32-bit integer
+long big = 10_000_000_000;    // 64-bit integer (underscores for readability)
+float ratio = 0.75f;          // 32-bit floating point — about 7 precise digits (suffix f)
+double price = 19.90;         // 64-bit floating point — about 15 digits (the default)
+decimal money = 19.90m;       // exact decimal — for money! (suffix m)
 bool isActive = true;
 char initial = 'D';
 string name = "Dana";
 ```
 
-</div>
-
-**איזה טיפוס עשרוני לבחור?**
+**Which fractional type should you choose?**
 
 | | `float` | `double` | `decimal` |
 |---|---|---|---|
-| גודל | 4 בתים | 8 בתים | 16 בתים |
-| ספרות מדויקות | כ-7 | כ-15–16 | 28–29 |
-| סיומת | `f` (חובה) | — (ברירת המחדל) | `m` (חובה) |
-| מתי | גרפיקה, משחקים (Unity), מערכים ענקיים | מדידות, חישובים מדעיים | **כסף** |
+| Size | 4 bytes | 8 bytes | 16 bytes |
+| Precise digits | ~7 | ~15–16 | 28–29 |
+| Suffix | `f` (required) | — (the default) | `m` (required) |
+| When | Graphics, games (Unity), huge arrays | Measurements, scientific calculations | **Money** |
 
-מספר עם נקודה עשרונית הוא `double` כברירת מחדל, ולכן `float f = 19.90;` ו-`decimal m = 19.90;` לא מתקמפלים (`CS0664`) — צריך `19.90f` או `19.90m`. `double` ו-`float` שומרים בבסיס 2, ולכן `0.1 + 0.2 == 0.3` הוא `false`; ב-`decimal` (בסיס 10) זה `true`. בקוד רגיל: `double` למדידות, `decimal` לכסף, ו-`float` כמעט אף פעם.
+A number with a decimal point is a `double` by default, so `float f = 19.90;` and `decimal m = 19.90;` don't compile (`CS0664`) — you need `19.90f` or `19.90m`. `double` and `float` are stored in base 2, so `0.1 + 0.2 == 0.3` is `false`; with `decimal` (base 10) it is `true`. In everyday code: `double` for measurements, `decimal` for money, and `float` almost never.
 
-**`var`** מבקש מהמהדר להסיק את הטיפוס מהערך. הטיפוס עדיין קבוע — `var x = 5;` ואז `x = "hi";` לא יתקמפל. משתמשים ב-`var` כשהטיפוס ברור מהצד הימני (`var list = new List<int>();`) ומציינים טיפוס מפורש כשהוא לא (`int count = GetCount();`).
+**`var`** asks the compiler to infer the type from the value. The type is still fixed — `var x = 5;` followed by `x = "hi";` won't compile. Use `var` when the type is obvious from the right-hand side (`var list = new List<int>();`) and write the type explicitly when it isn't (`int count = GetCount();`).
 
-### טיפוסי ערך מול טיפוסי הפניה
+### Value types vs. reference types
 
-זהו ההבדל החשוב ביותר להבין ביום הראשון:
+This is the single most important difference to understand on day one:
 
-| | טיפוסי ערך (value types) | טיפוסי הפניה (reference types) |
+| | Value types | Reference types |
 |---|---|---|
-| דוגמאות | `int`, `double`, `bool`, `char`, `decimal`, `DateTime`, `struct`, `enum` | `string`, מערכים, `class`, `record`, `List<T>`, `object` |
-| המשתנה מכיל | את הערך עצמו | "כתובת" של אובייקט ב-heap |
-| השמה `b = a` | מעתיקה את הערך | מעתיקה את ההפניה — שני שמות לאותו אובייקט |
-| ברירת מחדל | `0`, `false` וכו' | `null` |
-
-<div dir="ltr">
+| Examples | `int`, `double`, `bool`, `char`, `decimal`, `DateTime`, `struct`, `enum` | `string`, arrays, `class`, `record`, `List<T>`, `object` |
+| The variable holds | The value itself | The "address" of an object on the heap |
+| Assignment `b = a` | Copies the value | Copies the reference — two names for the same object |
+| Default value | `0`, `false`, etc. | `null` |
 
 ```csharp
 int a = 5;
-int b = a;      // העתקה
-b++;            // a עדיין 5
+int b = a;      // copy
+b++;            // a is still 5
 
 int[] arr1 = [1, 2, 3];
-int[] arr2 = arr1;   // אותו מערך!
-arr2[0] = 99;        // arr1[0] הוא עכשיו 99
+int[] arr2 = arr1;   // the same array!
+arr2[0] = 99;        // arr1[0] is now 99
 ```
 
-</div>
+`string` is a reference type, but it is **immutable**: every operation such as `ToUpper()` returns a new string. That's why `s.ToUpper();` without an assignment does nothing.
 
-`string` הוא טיפוס הפניה, אבל **בלתי-משתנה** (immutable): כל פעולה כמו `ToUpper()` מחזירה מחרוזת חדשה. לכן `s.ToUpper();` בלי השמה לא עושה כלום.
-
-## מחרוזות ואינטרפולציה
-
-<div dir="ltr">
+## Strings and interpolation
 
 ```csharp
 string first = "Dana", last = "Cohen";
 string full = $"{first} {last}";                  // string interpolation
-string padded = $"{first,-10}|{42,5}";             // יישור: רוחב 10 לשמאל, 5 לימין
+string padded = $"{first,-10}|{42,5}";             // alignment: width 10 left-aligned, 5 right-aligned
 string money = $"{1234.5:N2}";                     // "1,234.50"
 string pct = $"{0.256:P1}";                        // "25.6%"
 string multi = """
-    שורה ראשונה
-    שורה שנייה
+    First line
+    Second line
     """;                                           // raw string literal (C# 11)
 bool same = string.Equals(first, "dana", StringComparison.OrdinalIgnoreCase);
 ```
 
-</div>
+Useful operations: `Length`, `Contains`, `StartsWith`, `Split`, `Trim`, `Replace`, `Substring`, `string.Join(", ", list)`, `string.IsNullOrWhiteSpace(s)`.
 
-פעולות שימושיות: `Length`, `Contains`, `StartsWith`, `Split`, `Trim`, `Replace`, `Substring`, `string.Join(", ", list)`, `string.IsNullOrWhiteSpace(s)`.
-
-## בקרת זרימה
-
-<div dir="ltr">
+## Control flow
 
 ```csharp
 if (age >= 18 && isActive) Console.WriteLine("adult");
 else if (age >= 13) Console.WriteLine("teen");
 else Console.WriteLine("child");
 
-// switch expression — מחזיר ערך, חייב לכסות את כל המקרים (_ = ברירת מחדל)
+// switch expression — returns a value, must cover every case (_ = default)
 string grade = score switch
 {
     >= 90 => "A",
@@ -145,25 +117,21 @@ string grade = score switch
 };
 
 for (int i = 0; i < 3; i++) { }
-foreach (var item in items) { }        // הדרך המועדפת לעבור על אוסף
+foreach (var item in items) { }        // the preferred way to iterate over a collection
 while (condition) { }
 do { } while (condition);
 ```
 
-</div>
+`break` exits the loop, `continue` skips to the next iteration. Ternary operator: `var label = x > 0 ? "pos" : "neg";`.
 
-`break` יוצא מהלולאה, `continue` מדלג לאיטרציה הבאה. אופרטור טרנרי: `var label = x > 0 ? "pos" : "neg";`.
-
-## מתודות
-
-<div dir="ltr">
+## Methods
 
 ```csharp
 static int Add(int x, int y) => x + y;                         // expression-bodied
-static string Greet(string who, string greeting = "Hello")      // פרמטר אופציונלי
+static string Greet(string who, string greeting = "Hello")      // optional parameter
     => $"{greeting}, {who}!";
 
-static bool TryDivide(double x, double y, out double result)   // out — ערך חזרה נוסף
+static bool TryDivide(double x, double y, out double result)   // out — an extra return value
 {
     if (y == 0) { result = 0; return false; }
     result = x / y;
@@ -173,98 +141,84 @@ static bool TryDivide(double x, double y, out double result)   // out — ערך
 static (int Min, int Max) MinMax(int[] values) => (values.Min(), values.Max());  // tuple
 
 Greet("Yossi");                        // Hello, Yossi!
-Greet("Yossi", greeting: "שלום");      // named argument
+Greet("Yossi", greeting: "Hi");        // named argument
 var (min, max) = MinMax([4, 9, 1]);    // deconstruction
 ```
 
-</div>
-
-ב-top-level statements אפשר להגדיר מתודות ישירות בקובץ (local functions). `static` אומר שהמתודה לא ניגשת למשתנים מבחוץ — הרגל טוב לבהירות.
+With top-level statements you can define methods directly in the file (local functions). `static` means the method doesn't access variables from the surrounding code — a good habit for clarity.
 
 ## Nullable reference types
 
-ב-.NET המודרני, `string name` פירושו "מחרוזת שלעולם לא `null`", ו-`string? name` פירושו "אולי `null`". המהדר עוקב ומזהיר אם ניגשים למשהו שעלול להיות `null` בלי בדיקה:
-
-<div dir="ltr">
+In modern .NET, `string name` means "a string that is never `null`", and `string? name` means "might be `null`". The compiler tracks this and warns you if you access something that might be `null` without checking:
 
 ```csharp
-string? input = Console.ReadLine();        // ReadLine מחזיר null בסוף הקלט
-int len = input.Length;                    // אזהרה CS8602: dereference of a possibly null reference
+string? input = Console.ReadLine();        // ReadLine returns null at end of input
+int len = input.Length;                    // warning CS8602: dereference of a possibly null reference
 
-int len2 = input?.Length ?? 0;             // ?. מחזיר null אם input null; ?? נותן ברירת מחדל
-if (input is not null) Console.WriteLine(input.Length);   // אחרי הבדיקה — אין אזהרה
-string safe = input ?? "";                 // ?? — "אם null, אז"
-string forced = input!;                    // ! — "אני מבטיח שזה לא null" (להימנע!)
+int len2 = input?.Length ?? 0;             // ?. returns null if input is null; ?? supplies a default
+if (input is not null) Console.WriteLine(input.Length);   // after the check — no warning
+string safe = input ?? "";                 // ?? — "if null, then"
+string forced = input!;                    // ! — "I promise this isn't null" (avoid!)
 ```
 
-</div>
+This isn't just a cosmetic warning: `NullReferenceException` is the most common exception in .NET, and this mechanism prevents most of them before the program even runs. The rule: don't silence nullable warnings — fix them.
 
-זו לא רק אזהרה קוסמטית: `NullReferenceException` היא החריגה הנפוצה ביותר ב-.NET, והמנגנון הזה מונע את רובן עוד לפני ההרצה. הכלל: אל תשתיקו אזהרות nullable — תקנו אותן.
-
-## Namespaces ו-using
-
-<div dir="ltr">
+## Namespaces and using
 
 ```csharp
-namespace MyShop.Inventory;     // file-scoped namespace — כל הקובץ שייך אליו
+namespace MyShop.Inventory;     // file-scoped namespace — the whole file belongs to it
 
 public class Product { }
 ```
 
-</div>
+By convention, the folder structure mirrors the namespace. To use a type from another namespace: `using MyShop.Inventory;` at the top of the file, or the fully qualified name `MyShop.Inventory.Product`.
 
-מקובל שמבנה התיקיות משקף את ה-namespace. כדי להשתמש בטיפוס מ-namespace אחר: `using MyShop.Inventory;` בראש הקובץ, או שם מלא `MyShop.Inventory.Product`.
+## Visual Studio / VS Code — the basics
 
-## Visual Studio / VS Code — הבסיס
+- **Visual Studio**: File → New → Project → Console App. `F5` runs with the debugger, `Ctrl+F5` without. `Ctrl+.` for fix suggestions (Quick Actions), `Ctrl+K, Ctrl+D` to format code, `F12` to go to definition.
+- **VS Code**: install the **C# Dev Kit** extension. Run `dotnet new console`, open the folder, press `F5` (a `launch.json` is created automatically). Use the integrated terminal (`` Ctrl+` ``) for `dotnet run`.
+- Both tools use the same SDK and the same `dotnet` CLI — the project is identical.
 
-- **Visual Studio**: File → New → Project → Console App. `F5` ריצה עם דיבאגר, `Ctrl+F5` בלי. `Ctrl+.` להצעות תיקון (Quick Actions), `Ctrl+K, Ctrl+D` לעיצוב קוד, `F12` למעבר להגדרה.
-- **VS Code**: התקינו את הרחבת **C# Dev Kit**. `dotnet new console`, פתחו את התיקייה, `F5` (ייווצר `launch.json` אוטומטית). הטרמינל המשולב (`` Ctrl+` ``) ל-`dotnet run`.
-- שני הכלים משתמשים באותו SDK ובאותו `dotnet` CLI — הפרויקט זהה.
+CLI commands worth remembering: `dotnet new console -n Name`, `dotnet run`, `dotnet build`, `dotnet add package X`, `dotnet --version`.
 
-פקודות CLI שכדאי לזכור: `dotnet new console -n Name`, `dotnet run`, `dotnet build`, `dotnet add package X`, `dotnet --version`.
+## `enum` and `struct` in brief
 
-## `enum` ו-`struct` בקצרה
-
-שני טיפוסי ערך שתגדירו בעצמכם ותפגשו כבר היום. **`enum`** הוא קבוצה סגורה של ערכים בעלי שם — במקום "מספרי קסם" כמו `status == 2` כותבים `status == OrderStatus.Shipped`. המהדר מונע ערכים לא חוקיים, ה-IDE משלים אוטומטית, והקוד מסביר את עצמו. **`struct`** הוא כמו מחלקה קטנה שמועתקת לפי ערך (כמו `int`), ומתאים לנתונים קטנים ובלתי-משתנים כמו נקודה או צבע. ברוב המקרים תכתבו `class` או `record`; `struct` שמור למקרים שבהם הביצועים משנים.
-
-<div dir="ltr">
+Two value types you will define yourself and meet already today. An **`enum`** is a closed set of named values — instead of "magic numbers" like `status == 2` you write `status == OrderStatus.Shipped`. The compiler prevents invalid values, the IDE autocompletes, and the code explains itself. A **`struct`** is like a small class that is copied by value (like `int`), and suits small, immutable data such as a point or a color. Most of the time you'll write a `class` or a `record`; `struct` is reserved for cases where performance matters.
 
 ```csharp
 enum OrderStatus { Pending, Paid, Shipped, Cancelled }
 
 OrderStatus status = OrderStatus.Paid;
 if (status is OrderStatus.Paid or OrderStatus.Shipped) Console.WriteLine("money received");
-Console.WriteLine((int)status);                 // 1 — הערך המספרי מאחורי הקלעים
+Console.WriteLine((int)status);                 // 1 — the numeric value behind the scenes
 Console.WriteLine(Enum.Parse<OrderStatus>("Shipped"));
 
-readonly record struct Point(int X, int Y);     // טיפוס ערך קטן ובלתי-משתנה
+readonly record struct Point(int X, int Y);     // a small, immutable value type
 ```
 
-</div>
+## How to read a compiler error
 
-## איך קוראים שגיאת קומפילציה
+The C# compiler is your best friend: most mistakes are caught before the program even runs. An error message looks like this: `Program.cs(12,9): error CS0029: Cannot implicitly convert type 'string' to 'int'`. Read it from the end back to the start: what the problem is (an invalid conversion), the code (`CS0029` — you can search for exactly that in a search engine or in the documentation), and where (line 12, column 9). In Visual Studio, double-clicking the error in the Error List jumps to the line, and `Ctrl+.` often offers an automatic fix. Warnings don't stop the build, but it's worth treating them as errors — especially nullable warnings.
 
-המהדר של C# הוא החבר הכי טוב שלכם: רוב הטעויות נתפסות לפני שהתוכנית רצה בכלל. הודעת שגיאה נראית כך: `Program.cs(12,9): error CS0029: Cannot implicitly convert type 'string' to 'int'`. קראו אותה מימין לשמאל: מה הבעיה (המרה לא חוקית), מה הקוד (`CS0029` — אפשר לחפש אותו בדיוק כך במנוע חיפוש או בתיעוד), ואיפה (שורה 12, עמודה 9). ב-Visual Studio לחיצה כפולה על השגיאה ב-Error List מקפיצה לשורה, ו-`Ctrl+.` מציע לעיתים קרובות תיקון אוטומטי. אזהרות (warning) לא עוצרות את הבנייה, אבל כדאי להתייחס אליהן כאל שגיאות — במיוחד אזהרות nullable.
+## Common mistakes
 
-## טעויות נפוצות
+- **`==` between `double`s** — `0.1 + 0.2 == 0.3` is `false`. Use `decimal` for money; to compare `double`s, compare the difference against a small threshold.
+- **Modifying a string "in place"** — `name.ToUpper();` doesn't change `name`. You need `name = name.ToUpper();`.
+- **`int` overflow** — `int.MaxValue + 1` wraps around to a negative number without an error (unless you use `checked`). For large numbers: `long`.
+- **`Console.ReadLine()` returns `string?`** — always handle `null` (end of input) and non-numeric input (`int.TryParse`, module 06).
+- **Silencing nullable warnings with `!`** — almost always hides a real bug.
+- **`var` for everything** — `var result = Process();` tells the reader nothing. Write the type when it isn't obvious from the line.
+- **Forgetting the `m` on a `decimal`** — `decimal x = 19.90;` doesn't compile; you need `19.90m`.
 
-- **`==` בין `double`** — `0.1 + 0.2 == 0.3` הוא `false`. לכסף השתמשו ב-`decimal`; להשוואת `double` השוו הפרש לסף קטן.
-- **שינוי מחרוזת "במקום"** — `name.ToUpper();` לא משנה את `name`. צריך `name = name.ToUpper();`.
-- **`int` מתמלא** — `int.MaxValue + 1` מתגלגל למספר שלילי בלי שגיאה (אלא אם `checked`). ל-מספרים גדולים: `long`.
-- **`Console.ReadLine()` מחזיר `string?`** — תמיד טפלו ב-`null` (סוף קלט) ובקלט לא מספרי (`int.TryParse`, מודול 06).
-- **השתקת אזהרות nullable עם `!`** — כמעט תמיד מסתירה באג אמיתי.
-- **`var` לכל דבר** — `var result = Process();` לא אומר לקורא כלום. ציינו טיפוס כשהוא לא ברור מהשורה.
-- **שכחת `m` על `decimal`** — `decimal x = 19.90;` לא מתקמפל; צריך `19.90m`.
+## Summary
 
-## לסיכום
+- `dotnet new console` + `dotnet run` — that's all you need to get started. Top-level statements save you the `Main` ceremony.
+- Value vs. reference: an `int` is copied, an array/class instance is shared. This will explain a lot of behavior later today.
+- Interpolation `$"..."` with format specifiers (`:N2`, `,-10`) is the way to build strings.
+- `switch` expressions, `foreach`, expression-bodied methods, `out` and tuples — the modern syntax is short and readable.
+- `string?` vs. `string`: the compiler helps you avoid `NullReferenceException`. Let it.
 
-- `dotnet new console` + `dotnet run` — זה כל מה שצריך כדי להתחיל. top-level statements חוסכים את הטקס של `Main`.
-- הבדל ערך/הפניה: `int` מועתק, מערך/מחלקה משותפים. זה יסביר הרבה התנהגויות בהמשך היום.
-- אינטרפולציה `$"..."` עם פורמטים (`:N2`, `,-10`) היא הדרך לבנות מחרוזות.
-- `switch` expression, `foreach`, מתודות expression-bodied, `out` ו-tuples — התחביר המודרני קצר וקריא.
-- `string?` מול `string`: המהדר עוזר לכם להימנע מ-`NullReferenceException`. תנו לו.
-
-## קריאה נוספת
+## Further reading
 
 - [A tour of the C# language](https://learn.microsoft.com/dotnet/csharp/tour-of-csharp/)
 - [Top-level statements](https://learn.microsoft.com/dotnet/csharp/fundamentals/program-structure/top-level-statements)
@@ -272,5 +226,3 @@ readonly record struct Point(int X, int Y);     // טיפוס ערך קטן וב
 - [Nullable reference types](https://learn.microsoft.com/dotnet/csharp/nullable-references)
 - [String interpolation](https://learn.microsoft.com/dotnet/csharp/language-reference/tokens/interpolated)
 - [dotnet CLI overview](https://learn.microsoft.com/dotnet/core/tools/)
-
-</div>

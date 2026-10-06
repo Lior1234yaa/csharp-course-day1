@@ -1,18 +1,14 @@
-<div dir="rtl">
+# Module 06 — Exception Handling and Debugging Strategies
 
-# מודול 06 — טיפול בחריגות ואסטרטגיות דיבוג
+Software fails: a file doesn't exist, the user typed "abc" instead of a number, the network went down, and someone tried to withdraw more than the account holds. The difference between good and bad software is not that the good one never fails, but that it fails **in a controlled way**: a clear message, a consistent state, resources released. In this module we learn the .NET exception mechanism, when to use it and when not to, and then the tool that will save you the most hours in your career — the debugger.
 
-תוכנה נכשלת: קובץ לא קיים, המשתמש הקליד "abc" במקום מספר, הרשת נפלה, ומישהו ניסה למשוך יותר ממה שיש בחשבון. ההבדל בין תוכנה טובה לרעה הוא לא שהראשונה לא נכשלת, אלא שהיא נכשלת **בצורה מבוקרת**: הודעה ברורה, מצב עקבי, משאבים משוחררים. במודול הזה נלמד את מנגנון החריגות של .NET, מתי להשתמש בו ומתי לא, ואז את הכלי שיחסוך לכם הכי הרבה שעות בקריירה — הדיבאגר.
+## What is an exception
 
-## מה זו חריגה
+An exception is an object that describes an error, and it is "thrown" (`throw`) from the place where the error was detected. Throwing stops normal execution and climbs up the call stack until someone "catches" it (`catch`). If nobody catches it, the program crashes with a stack trace. All exceptions inherit from `System.Exception`, and each one has a `Message`, a `StackTrace` and an `InnerException` (the exception that caused it).
 
-חריגה (exception) היא אובייקט שמתאר שגיאה, ו"נזרק" (`throw`) מהמקום שבו התגלתה. הזריקה עוצרת את הריצה הרגילה ומטפסת במעלה ה-call stack עד שמישהו "תופס" אותה (`catch`). אם אף אחד לא תופס — התוכנית קורסת עם stack trace. כל החריגות יורשות מ-`System.Exception`, ויש לכל אחת `Message`, `StackTrace` ו-`InnerException` (החריגה שגרמה לה).
-
-חריגות נפוצות שתפגשו: `NullReferenceException` (גישה ל-null), `ArgumentException` / `ArgumentNullException` / `ArgumentOutOfRangeException` (פרמטר לא תקין), `InvalidOperationException` (הפעולה לא חוקית במצב הנוכחי), `FormatException` (פרסינג), `KeyNotFoundException`, `IndexOutOfRangeException`, `IOException`, `HttpRequestException`.
+Common exceptions you will meet: `NullReferenceException` (accessing null), `ArgumentException` / `ArgumentNullException` / `ArgumentOutOfRangeException` (invalid parameter), `InvalidOperationException` (the operation isn't valid in the current state), `FormatException` (parsing), `KeyNotFoundException`, `IndexOutOfRangeException`, `IOException`, `HttpRequestException`.
 
 ## `try` / `catch` / `finally`
-
-<div dir="ltr">
 
 ```csharp
 try
@@ -21,36 +17,32 @@ try
     var count = int.Parse(text);
     Console.WriteLine(100 / count);
 }
-catch (FileNotFoundException ex)             // ספציפי קודם
+catch (FileNotFoundException ex)             // specific first
 {
     Console.WriteLine($"missing file: {ex.FileName}");
 }
-catch (FormatException)                       // אפשר בלי משתנה
+catch (FormatException)                       // the variable is optional
 {
     Console.WriteLine("file does not contain a number");
 }
-catch (Exception ex)                          // כללי — אחרון
+catch (Exception ex)                          // general — last
 {
     Console.WriteLine($"unexpected: {ex.GetType().Name}: {ex.Message}");
-    throw;                                    // ראו למטה
+    throw;                                    // see below
 }
 finally
 {
-    Console.WriteLine("runs always — with or without exception");   // ניקוי
+    Console.WriteLine("runs always — with or without exception");   // cleanup
 }
 ```
 
-</div>
-
-- ה-`catch` הראשון שמתאים (לפי סדר, כולל ירושה) מטפל. לכן ספציפי לפני כללי — המהדר אפילו יזהיר אם הסדר הפוך.
-- `finally` רץ תמיד: אחרי הצלחה, אחרי `catch`, אחרי `return` בתוך ה-`try`, ואפילו אחרי `continue`. זה המקום לשחרר משאבים.
-- אפשר `try/finally` בלי `catch` — "לא מטפל, אבל מנקה".
+- The first matching `catch` (in order, including inheritance) handles it. That's why specific comes before general — the compiler even warns you if the order is reversed.
+- `finally` always runs: after success, after a `catch`, after a `return` inside the `try`, and even after `continue`. This is the place to release resources.
+- You can have `try/finally` without `catch` — "I don't handle it, but I clean up".
 
 ### Exception filters — `when`
 
-פילטר מאפשר לתפוס רק כשמתקיים תנאי, בלי לתפוס ולזרוק מחדש:
-
-<div dir="ltr">
+A filter lets you catch only when a condition holds, without catching and rethrowing:
 
 ```csharp
 catch (InsufficientFundsException ex) when (ex.Shortfall > 1000)
@@ -64,37 +56,29 @@ catch (InsufficientFundsException ex)
 catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound) { }
 ```
 
-</div>
+A subtle advantage: when the filter returns `false`, the stack is not "unwound" — and in the debugger you'll see the original throw location. A common logging trick: `catch (Exception ex) when (Log(ex))` where `Log` returns `false` — it logs without catching.
 
-יתרון עדין: כשהפילטר מחזיר `false`, ה-stack לא "נפרש" — ובדיבאגר תראו את מקום הזריקה המקורי. טריק נפוץ ללוגים: `catch (Exception ex) when (Log(ex))` כש-`Log` מחזיר `false` — רושם ולא תופס.
+## `throw;` vs. `throw ex;`
 
-## `throw;` מול `throw ex;`
-
-כשתופסים חריגה ורוצים להעביר אותה הלאה (אחרי לוג, למשל):
-
-<div dir="ltr">
+When you catch an exception and want to pass it on (after logging it, for example):
 
 ```csharp
 catch (Exception ex)
 {
     logger.Log(ex);
-    throw;          // נכון: שומר את ה-stack trace המקורי
-    // throw ex;    // שגוי: ה-stack trace מתחיל מכאן — איבדנו איפה זה באמת קרה (CA2200)
+    throw;          // correct: preserves the original stack trace
+    // throw ex;    // wrong: the stack trace starts here — we've lost where it really happened (CA2200)
 }
 ```
 
-</div>
+If you want to wrap it in your own exception, pass the original as the `InnerException`: `throw new DataAccessException("failed to load orders", ex);`. That way no information is lost.
 
-אם רוצים לעטוף בחריגה משלכם, העבירו את המקורית כ-`InnerException`: `throw new DataAccessException("failed to load orders", ex);`. כך לא מאבדים מידע.
+## Custom exceptions
 
-## חריגות מותאמות אישית
-
-הגדירו חריגה משלכם כשלמטפל יש **מה לעשות** עם המידע: סוג שגיאה עסקית, נתונים נלווים.
-
-<div dir="ltr">
+Define your own exception when the handler has **something to do** with the information: a business error type, accompanying data.
 
 ```csharp
-public class BankException(string message) : Exception(message);   // בסיס לכל החריגות של הדומיין
+public class BankException(string message) : Exception(message);   // base for all domain exceptions
 
 public class InsufficientFundsException(string accountId, decimal requested, decimal available)
     : BankException($"Insufficient funds in {accountId}: requested {requested:N2}, available {available:N2}")
@@ -106,35 +90,27 @@ public class InsufficientFundsException(string accountId, decimal requested, dec
 }
 ```
 
-</div>
+Conventions: an `Exception` suffix, inherit from `Exception` (not `ApplicationException`), a clear message built in the constructor, properties for the data. A hierarchy (`BankException` as the base) allows a single `catch (BankException)` for all business errors, plus a specific `catch` when needed.
 
-מוסכמות: סיומת `Exception`, ירושה מ-`Exception` (לא `ApplicationException`), הודעה ברורה שנבנית בבנאי, properties לנתונים. היררכיה (`BankException` כבסיס) מאפשרת `catch (BankException)` אחד לכל השגיאות העסקיות, ו-`catch` ספציפי כשצריך.
+## `using` and `IDisposable`
 
-## `using` ו-`IDisposable`
-
-אובייקטים שמחזיקים משאב חיצוני — קובץ, חיבור DB, socket, `HttpClient` — מממשים `IDisposable`. חייבים לקרוא ל-`Dispose()` כשמסיימים, **גם אם הייתה חריגה**. `using` עושה בדיוק את זה: `try/finally` שקורא ל-`Dispose`.
-
-<div dir="ltr">
+Objects that hold an external resource — a file, a DB connection, a socket, `HttpClient` — implement `IDisposable`. You must call `Dispose()` when you're done, **even if an exception occurred**. `using` does exactly that: a `try/finally` that calls `Dispose`.
 
 ```csharp
 using (var writer = new StreamWriter("log.txt"))
 {
     writer.WriteLine("hello");
-}   // Dispose() כאן — הקובץ נסגר וה-buffer נכתב
+}   // Dispose() here — the file is closed and the buffer is flushed
 
-using var reader = new StreamReader("data.csv");   // using declaration (C# 8): Dispose בסוף הבלוק המקיף
+using var reader = new StreamReader("data.csv");   // using declaration (C# 8): Dispose at the end of the enclosing block
 var header = reader.ReadLine();
 ```
 
-</div>
+Without `using`, a file may stay open (and another program won't be able to access it), or the buffer may never be written to disk (the log is "empty"). When you write a class that holds an `IDisposable` — implement `IDisposable` yourself and pass the `Dispose` call on.
 
-בלי `using`, קובץ עלול להישאר פתוח (ותוכנית אחרת לא תוכל לגשת אליו) או שה-buffer לא ייכתב לדיסק (הלוג "ריק"). כשאתם כותבים מחלקה שמחזיקה `IDisposable` — ממשו `IDisposable` בעצמכם והעבירו את ה-`Dispose` הלאה.
+## Guard clauses — fail early
 
-## Guard clauses — נכשלים מוקדם
-
-בדקו פרמטרים **בכניסה** למתודה וזרקו מיד. השגיאה נתפסת קרוב למקור, ושאר המתודה נקי מ-`if`-ים:
-
-<div dir="ltr">
+Check parameters **at the entry** of a method and throw immediately. The error is caught close to its source, and the rest of the method is free of `if`s:
 
 ```csharp
 public void Transfer(Account? from, Account? to, decimal amount)
@@ -143,7 +119,7 @@ public void Transfer(Account? from, Account? to, decimal amount)
     ArgumentNullException.ThrowIfNull(to);
     ArgumentOutOfRangeException.ThrowIfNegativeOrZero(amount);
     if (ReferenceEquals(from, to)) throw new ArgumentException("same account", nameof(to));
-    // מכאן — הכל תקין
+    // from here on — everything is valid
 }
 
 public Book(string isbn, string title)
@@ -154,15 +130,11 @@ public Book(string isbn, string title)
 }
 ```
 
-</div>
+The static methods `ThrowIfNull`, `ThrowIfNullOrEmpty`, `ThrowIfNullOrWhiteSpace`, `ThrowIfNegative`, `ThrowIfNegativeOrZero`, `ThrowIfGreaterThan` etc. (from .NET 6–8) save lines and automatically use the parameter name in the message.
 
-המתודות הסטטיות `ThrowIfNull`, `ThrowIfNullOrEmpty`, `ThrowIfNullOrWhiteSpace`, `ThrowIfNegative`, `ThrowIfNegativeOrZero`, `ThrowIfGreaterThan` וכו' (מ-.NET 6–8) חוסכות שורות ומשתמשות אוטומטית בשם הפרמטר בהודעה.
+## When **not** to throw: the TryParse pattern
 
-## מתי **לא** לזרוק: ה-TryParse pattern
-
-חריגות יקרות (יחסית) ומיועדות למצבים **חריגים**. קלט לא תקין מהמשתמש הוא לא חריג — הוא צפוי. לכן ל-.NET יש זוגות `Parse`/`TryParse`:
-
-<div dir="ltr">
+Exceptions are (relatively) expensive and are meant for **exceptional** situations. Invalid user input is not exceptional — it's expected. That's why .NET has `Parse`/`TryParse` pairs:
 
 ```csharp
 Console.Write("age: ");
@@ -173,60 +145,58 @@ else
     Console.WriteLine("please enter a number between 0 and 120");
 ```
 
-</div>
+Same idea: `Dictionary.TryGetValue`, `Dictionary.TryAdd`, `Queue.TryDequeue`, `Enum.TryParse`, `DateTime.TryParse`. And for your own methods: if failure is a routine outcome (a search that found nothing), return `bool`/`null`; if it's a rule violation (withdrawing more than the balance, an invalid parameter) — throw.
 
-אותו רעיון: `Dictionary.TryGetValue`, `Dictionary.TryAdd`, `Queue.TryDequeue`, `Enum.TryParse`, `DateTime.TryParse`. ולמתודות שלכם: אם כישלון הוא תוצאה שגרתית (חיפוש שלא מצא), החזירו `bool`/`null`; אם הוא הפרת כללים (משיכה מעל היתרה, פרמטר לא חוקי) — זרקו.
+A typical input loop: read, `TryParse`, if invalid — print a message and read again; if `ReadLine()` returns `null` (end of input) — exit gracefully.
 
-לולאת קלט טיפוסית: לקרוא, `TryParse`, אם לא תקין — הודעה ולקרוא שוב; אם `ReadLine()` מחזיר `null` (סוף הקלט) — לצאת בצורה מסודרת.
+## Debugging strategies in Visual Studio
 
-## אסטרטגיות דיבוג ב-Visual Studio
+`Console.WriteLine` is not debugging. The debugger lets you pause the program, inspect any variable, and step forward line by line.
 
-`Console.WriteLine` הוא לא דיבוג. הדיבאגר מאפשר לעצור את התוכנית, להסתכל על כל משתנה, ולהתקדם שורה-שורה.
-
-| כלי | איך | מתי |
+| Tool | How | When |
 |---|---|---|
-| **Breakpoint** | `F9` על שורה, `F5` להריץ עד אליה | "מה קורה כאן?" |
-| **Step Over / Into / Out** | `F10` / `F11` / `Shift+F11` | שורה-שורה; להיכנס למתודה; לצאת ממנה |
-| **Conditional breakpoint** | קליק ימני על הנקודה → Conditions: `amount > 1000` או Hit Count | הבאג קורה רק באיטרציה ה-347 |
-| **Watch / Locals / Autos** | Debug → Windows → Watch; הוסיפו ביטוי (`from.Balance`, `list.Count`) | לעקוב אחרי ערכים תוך כדי צעדים |
-| **Immediate Window** | `Ctrl+Alt+I`; הקלידו ביטויים: `_accounts.Keys`, `Calc(5)` | לבדוק השערה בלי לשנות קוד |
-| **Call Stack** | `Ctrl+Alt+C` | "איך הגעתי לכאן?" — לחיצה כפולה קופצת לפריים |
-| **Exception Settings** | `Ctrl+Alt+E`; סמנו סוג חריגה → break when thrown | לעצור **במקום הזריקה**, לא ב-catch |
-| **Edit & Continue** | שנו קוד בזמן שהתוכנית מושהית, המשיכו | לתקן ולבדוק בלי להריץ מחדש |
-| **DataTips / Pin** | ריחוף מעל משתנה; הצמדה עם הסיכה | הצצה מהירה |
-| **Run to Cursor** | `Ctrl+F10` | "רוץ עד כאן" בלי נקודת עצירה |
+| **Breakpoint** | `F9` on a line, `F5` to run until it | "What's happening here?" |
+| **Step Over / Into / Out** | `F10` / `F11` / `Shift+F11` | Line by line; step into a method; step out of it |
+| **Conditional breakpoint** | Right-click the breakpoint → Conditions: `amount > 1000` or Hit Count | The bug only happens on iteration 347 |
+| **Watch / Locals / Autos** | Debug → Windows → Watch; add an expression (`from.Balance`, `list.Count`) | Track values while stepping |
+| **Immediate Window** | `Ctrl+Alt+I`; type expressions: `_accounts.Keys`, `Calc(5)` | Test a hypothesis without changing code |
+| **Call Stack** | `Ctrl+Alt+C` | "How did I get here?" — double-click jumps to a frame |
+| **Exception Settings** | `Ctrl+Alt+E`; check an exception type → break when thrown | Stop **where it's thrown**, not in the catch |
+| **Edit & Continue** | Change code while the program is paused, then continue | Fix and test without restarting |
+| **DataTips / Pin** | Hover over a variable; pin it with the pin icon | A quick peek |
+| **Run to Cursor** | `Ctrl+F10` | "Run up to here" without a breakpoint |
 
-אסטרטגיה: (1) **שחזרו** את הבאג באופן דטרמיניסטי; (2) שערו איפה הוא — נקודת עצירה **לפני** המקום החשוד; (3) `F10` עם Watch על המשתנים המעורבים עד שהערך "מתקלקל"; (4) תקנו, הריצו שוב, ורצוי — כתבו בדיקה (יום 2). כשיש חריגה — Exception Settings + Call Stack מראים את מקור הבעיה, לא רק את הסימפטום.
+Strategy: (1) **reproduce** the bug deterministically; (2) form a hypothesis about where it is — set a breakpoint **before** the suspicious spot; (3) `F10` with a Watch on the variables involved until the value "goes bad"; (4) fix it, run again, and ideally — write a test (Day 4). When there's an exception — Exception Settings + Call Stack show the source of the problem, not just the symptom.
 
-ב-VS Code: אותם מושגים ב-Run and Debug (`F5`), עם `launch.json` שנוצר אוטומטית. `dotnet run` לבד לא מריץ דיבאגר.
+In VS Code: the same concepts under Run and Debug (`F5`), with an automatically generated `launch.json`. `dotnet run` on its own does not run a debugger.
 
-## `Debug.Assert` ולוגים
+## `Debug.Assert` and logging
 
-- **`Debug.Assert(condition, "message")`** — בודק הנחה בזמן פיתוח. אם התנאי `false`, הדיבאגר עוצר. ב-Release השורה **נמחקת** לחלוטין — אפס עלות. השתמשו ל-invariants פנימיים ("היתרה לא יכולה להיות שלילית כאן"), לא לוולידציית קלט.
-- **`Debug.WriteLine`** — הדפסה לחלון Output של הדיבאגר, רק ב-Debug.
-- **לוגים** (`ILogger` מ-`Microsoft.Extensions.Logging`, יום 2) — לייצור. רמות: Trace/Debug/Information/Warning/Error/Critical. רשמו את החריגה כולה (`logger.LogError(ex, "transfer failed")`), לא רק `ex.Message`.
+- **`Debug.Assert(condition, "message")`** — checks an assumption during development. If the condition is `false`, the debugger stops. In Release the line is **removed** entirely — zero cost. Use it for internal invariants ("the balance can't be negative here"), not for input validation.
+- **`Debug.WriteLine`** — prints to the debugger's Output window, in Debug builds only.
+- **Logging** (`ILogger` from `Microsoft.Extensions.Logging`, Day 4) — for production. Levels: Trace/Debug/Information/Warning/Error/Critical. Log the whole exception (`logger.LogError(ex, "transfer failed")`), not just `ex.Message`.
 
-## טעויות נפוצות
+## Common mistakes
 
-- **`catch (Exception) { }` ריק** — "בולע" שגיאות; התוכנה ממשיכה במצב שבור ומישהו יגלה את זה שבוע אחר כך. לפחות לוג, ובדרך כלל `throw;`.
-- **`throw ex;`** — איבוד stack trace.
-- **חריגות לזרימת בקרה** — `try { int.Parse } catch` בלולאה. `TryParse`.
-- **`catch` רחב מדי ברמה נמוכה** — תפסו מה שאתם יודעים לטפל בו; תנו לשאר לעלות למי שיודע.
-- **בלי `using`** על קבצים/חיבורים — דליפת משאבים, קבצים נעולים, לוג ריק.
-- **הודעה חסרת מידע** — `throw new Exception("error")`. כתבו מה, איפה, ואיזה ערך.
-- **`Debug.Assert` לוולידציית קלט** — נעלם ב-Release והבדיקה לא תרוץ.
-- **דיבוג עם `Console.WriteLine`** כשיש דיבאגר — איטי, מלכלך את הקוד, ונשכח בפרודקשן.
+- **An empty `catch (Exception) { }`** — "swallows" errors; the software keeps running in a broken state and someone discovers it a week later. At least log it, and usually `throw;`.
+- **`throw ex;`** — loses the stack trace.
+- **Exceptions for control flow** — `try { int.Parse } catch` in a loop. Use `TryParse`.
+- **A `catch` that's too broad at a low level** — catch what you know how to handle; let the rest bubble up to whoever does.
+- **No `using`** on files/connections — resource leaks, locked files, an empty log.
+- **An uninformative message** — `throw new Exception("error")`. Say what, where, and which value.
+- **`Debug.Assert` for input validation** — it disappears in Release and the check won't run.
+- **Debugging with `Console.WriteLine`** when you have a debugger — slow, clutters the code, and gets forgotten in production.
 
-## לסיכום
+## Summary
 
-- `try/catch/finally`: ספציפי לפני כללי, `finally` תמיד רץ, `when` לסינון.
-- `throw;` שומר stack; חריגות מותאמות עם נתונים ובסיס משותף.
-- `using` לכל `IDisposable` — שחרור מובטח.
-- Guard clauses (`ArgumentException.ThrowIfNullOrEmpty`...) בכניסה; `TryParse` לקלט צפוי; חריגות למצבים חריגים.
-- דיבאגר: breakpoints (גם מותנים), Step, Watch, Immediate, Call Stack, Exception Settings, Edit & Continue.
-- `Debug.Assert` להנחות פנימיות בפיתוח; לוגים לייצור.
+- `try/catch/finally`: specific before general, `finally` always runs, `when` for filtering.
+- `throw;` preserves the stack; custom exceptions carry data and share a common base.
+- `using` for every `IDisposable` — guaranteed release.
+- Guard clauses (`ArgumentException.ThrowIfNullOrEmpty`...) at the entry; `TryParse` for expected input; exceptions for exceptional situations.
+- Debugger: breakpoints (including conditional ones), Step, Watch, Immediate, Call Stack, Exception Settings, Edit & Continue.
+- `Debug.Assert` for internal assumptions during development; logging for production.
 
-## קריאה נוספת
+## Further reading
 
 - [Exceptions and exception handling](https://learn.microsoft.com/dotnet/csharp/fundamentals/exceptions/)
 - [Best practices for exceptions](https://learn.microsoft.com/dotnet/standard/exceptions/best-practices-for-exceptions)
@@ -236,5 +206,3 @@ else
 - [Debugging in Visual Studio](https://learn.microsoft.com/visualstudio/debugger/)
 - [Navigate through code with the debugger](https://learn.microsoft.com/visualstudio/debugger/navigating-through-code-with-the-debugger)
 - [Manage exceptions with the debugger](https://learn.microsoft.com/visualstudio/debugger/managing-exceptions-with-the-debugger)
-
-</div>

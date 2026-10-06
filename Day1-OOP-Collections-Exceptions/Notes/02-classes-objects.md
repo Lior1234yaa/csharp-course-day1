@@ -1,23 +1,19 @@
-<div dir="rtl">
+# Module 02 — Classes, Objects, Constructors and Properties
 
-# מודול 02 — מחלקות, אובייקטים, בנאים ומאפיינים
+Object-oriented programming (OOP) is a way of organizing software around **objects**: units that bundle together data (state) and the behavior (methods) that operates on that data. Instead of a function `Deposit(account, amount)` that receives a "data structure" and modifies it, we have an `account` object that knows how to deposit into itself — and only it decides whether the deposit is valid. In this module we'll learn the building blocks: classes, objects, constructors and properties. In the next module we'll see the four principles (encapsulation, inheritance, polymorphism, abstraction) that turn this into good design.
 
-תכנות מונחה-עצמים (OOP) הוא דרך לארגן תוכנה סביב **עצמים**: יחידות שמאגדות יחד נתונים (מצב) והתנהגות (מתודות) שפועלת על הנתונים האלה. במקום פונקציה `Deposit(account, amount)` שמקבלת "מבנה נתונים" ומשנה אותו, יש לנו אובייקט `account` שיודע להפקיד לעצמו — ורק הוא מחליט אם ההפקדה חוקית. במודול הזה נלמד את אבני הבניין: מחלקות, אובייקטים, בנאים ו-properties. במודול הבא נראה את ארבעת העקרונות (אנקפסולציה, ירושה, פולימורפיזם, הפשטה) שהופכים את זה לעיצוב טוב.
+## Class and object
 
-## מחלקה ואובייקט
-
-**מחלקה** (`class`) היא תבנית — "כך נראה חשבון בנק". **אובייקט** (מופע, instance) הוא חשבון בנק ספציפי שנוצר מהתבנית עם `new`. מחלקה אחת, אינסוף אובייקטים, לכל אחד מצב משלו.
-
-<div dir="ltr">
+A **class** (`class`) is a template — "this is what a bank account looks like". An **object** (an instance) is a specific bank account created from the template with `new`. One class, any number of objects, each with its own state.
 
 ```csharp
 class BankAccount
 {
-    private decimal _balance;                 // שדה (field) — המצב הפנימי, פרטי
+    private decimal _balance;                 // field — the internal state, private
 
-    public string Owner { get; set; } = "";   // property — הפנים הציבוריות
+    public string Owner { get; set; } = "";   // property — the public face
 
-    public void Deposit(decimal amount)       // מתודה — התנהגות
+    public void Deposit(decimal amount)       // method — behavior
     {
         if (amount <= 0) throw new ArgumentOutOfRangeException(nameof(amount));
         _balance += amount;
@@ -26,36 +22,32 @@ class BankAccount
     public decimal GetBalance() => _balance;
 }
 
-var acc = new BankAccount { Owner = "Dana" };   // יצירה + object initializer
+var acc = new BankAccount { Owner = "Dana" };   // creation + object initializer
 acc.Deposit(500);
 Console.WriteLine($"{acc.Owner}: {acc.GetBalance()}");
 ```
 
-</div>
+Conventions: private fields in `_camelCase`, everything public in `PascalCase`. One class per file, with the file named after the class.
 
-מוסכמות: שדות פרטיים ב-`_camelCase`, כל מה שציבורי ב-`PascalCase`. מחלקה לכל קובץ, שם הקובץ כשם המחלקה.
+## Fields vs. properties
 
-## שדות מול Properties
+A **field** is a variable inside the object. A **property** looks like a field from the outside (`acc.Balance`), but behind it are `get`/`set` methods that you control. Why not just public fields? Because a property lets you:
 
-**שדה** הוא משתנה בתוך האובייקט. **Property** נראה כמו שדה מבחוץ (`acc.Balance`), אבל מאחוריו יש מתודות `get`/`set` שאפשר לשלוט בהן. למה לא פשוט שדות ציבוריים? כי property מאפשר:
-
-- לאמת ערכים (`set` שבודק);
-- לחשב ערך בזמן קריאה במקום לשמור אותו;
-- לחשוף קריאה בלבד;
-- לשנות את המימוש בעתיד בלי לשבור את מי שמשתמש במחלקה.
-
-<div dir="ltr">
+- validate values (a `set` that checks);
+- compute a value when it is read instead of storing it;
+- expose read-only access;
+- change the implementation in the future without breaking code that uses the class.
 
 ```csharp
 class Product
 {
-    // auto-property: המהדר יוצר שדה נסתר
+    // auto-property: the compiler creates a hidden field
     public string Name { get; set; } = "";
 
-    // קריאה ציבורית, כתיבה רק מתוך המחלקה
+    // public read, write only from inside the class
     public decimal Price { get; private set; }
 
-    // property מלא עם ולידציה
+    // full property with validation
     private int _stock;
     public int Stock
     {
@@ -63,34 +55,30 @@ class Product
         set => _stock = value >= 0 ? value : throw new ArgumentOutOfRangeException(nameof(value));
     }
 
-    // computed property — אין שדה, מחושב בכל קריאה
+    // computed property — no field, calculated on every read
     public decimal PriceWithVat => Price * 1.18m;
 
-    // init-only: ניתן לקבוע רק ביצירה (object initializer / בנאי), אחר כך read-only
+    // init-only: can be set only at creation (object initializer / constructor), read-only afterwards
     public string Sku { get; init; } = "";
 
-    // required: חובה לקבוע ביצירה, אחרת שגיאת קומפילציה
+    // required: must be set at creation, otherwise a compile error
     public required string Category { get; init; }
 }
 
 var p = new Product { Name = "Keyboard", Sku = "K-1", Category = "Peripherals" };
-// p.Sku = "X";   // שגיאה: init-only
+// p.Sku = "X";   // error: init-only
 ```
 
-</div>
+`required` + `init` is the modern combination for "an object that must be valid from the moment it is created, and then doesn't change" — without writing a constructor with 6 parameters.
 
-`required` + `init` הם השילוב המודרני ל"אובייקט שחייב להיות תקין מהרגע שנוצר, ואז לא משתנה" — בלי לכתוב בנאי עם 6 פרמטרים.
+## Constructors
 
-## בנאים (constructors)
-
-בנאי הוא המתודה שרצה ב-`new`. תפקידו: להביא את האובייקט למצב תקין. אם לא כותבים בנאי, יש בנאי ריק ברירת מחדל.
-
-<div dir="ltr">
+A constructor is the method that runs on `new`. Its job: bring the object into a valid state. If you don't write a constructor, there is a default parameterless one.
 
 ```csharp
 class BankAccount
 {
-    public string Id { get; }          // read-only — נקבע רק בבנאי
+    public string Id { get; }          // read-only — set only in the constructor
     public string Owner { get; set; }
     public decimal Balance { get; private set; }
 
@@ -101,7 +89,7 @@ class BankAccount
         Owner = owner;
     }
 
-    // overload שמשרשר לבנאי הראשון עם this(...)
+    // overload that chains to the first constructor with this(...)
     public BankAccount(string id, string owner, decimal initialDeposit) : this(id, owner)
     {
         Deposit(initialDeposit);
@@ -114,44 +102,36 @@ var a1 = new BankAccount("IL-1", "Dana");
 var a2 = new BankAccount("IL-2", "Yossi", 1_000);
 ```
 
-</div>
-
 ### Primary constructors (C# 12)
 
-כשהבנאי רק מעתיק פרמטרים לשדות, אפשר לקצר: הפרמטרים נכתבים בכותרת המחלקה וזמינים בכל גוף המחלקה.
-
-<div dir="ltr">
+When the constructor only copies parameters into fields, you can shorten it: the parameters are written in the class header and are available throughout the class body.
 
 ```csharp
 class TemperatureSensor(string location, double initial)
 {
     private readonly List<double> _readings = [initial];
 
-    public string Location => location;          // הפרמטר "נלכד"
+    public string Location => location;          // the parameter is "captured"
     public double Last => _readings[^1];
     public void Read(double value) => _readings.Add(value);
 }
 ```
 
-</div>
-
-שימו לב: הפרמטרים של primary constructor הם לא properties — הם לא נראים מבחוץ אלא אם חושפים אותם. ב-`record` (בהמשך) הם כן הופכים ל-properties אוטומטית.
+Note: primary constructor parameters are not properties — they aren't visible from the outside unless you expose them. In a `record` (covered below) they do become properties automatically.
 
 ## `this`
 
-`this` הוא ההפניה לאובייקט הנוכחי. משתמשים בו כשיש התנגשות שמות (`this.name = name;`), לשרשור בנאים (`: this(...)`), או כדי להעביר את האובייקט עצמו למקום אחר (`registry.Add(this)`). ברוב הקוד המודרני לא צריך לכתוב אותו.
+`this` is the reference to the current object. You use it when names collide (`this.name = name;`), for constructor chaining (`: this(...)`), or to pass the object itself somewhere else (`registry.Add(this)`). In most modern code you don't need to write it.
 
-## חברים סטטיים
+## Static members
 
-`static` שייך **למחלקה** ולא לאובייקט ספציפי. מונה מופעים, קבועים, מתודות עזר "טהורות" ו-factory methods הם המקרים הקלאסיים:
-
-<div dir="ltr">
+`static` belongs to **the class** rather than to a specific object. Instance counters, constants, "pure" helper methods and factory methods are the classic cases:
 
 ```csharp
 class BankAccount
 {
-    public const decimal MinDeposit = 10m;              // קבוע — static מובנה
-    public static int Count { get; private set; }       // משותף לכל המופעים
+    public const decimal MinDeposit = 10m;              // constant — implicitly static
+    public static int Count { get; private set; }       // shared by all instances
 
     public BankAccount(string id, string owner) { /*...*/ Count++; }
 
@@ -159,18 +139,14 @@ class BankAccount
     private static string NextId() => $"IL-{Count + 1:D4}";
 }
 
-Console.WriteLine(BankAccount.Count);       // דרך המחלקה, לא דרך אובייקט
+Console.WriteLine(BankAccount.Count);       // through the class, not through an object
 ```
 
-</div>
-
-מחלקה שכולה static (`static class MathUtils`) לא ניתנת ליצירה — היא רק "ארגז כלים" של מתודות. `Math`, `Console`, `File` הן כאלה.
+A class that is entirely static (`static class MathUtils`) cannot be instantiated — it's just a "toolbox" of methods. `Math`, `Console` and `File` are like that.
 
 ## Object initializers
 
-תחביר נוח לקבוע properties מיד אחרי היצירה. משתלב עם `init`/`required`:
-
-<div dir="ltr">
+A convenient syntax for setting properties right after creation. It works together with `init`/`required`:
 
 ```csharp
 var order = new Order
@@ -181,65 +157,59 @@ var order = new Order
 };
 ```
 
-</div>
+## `record` vs. `class`
 
-## `record` מול `class`
-
-`record` הוא מחלקה שה-מהדר כותב עבורה אוטומטית: בנאי, properties, `Equals`/`GetHashCode` **לפי ערך**, `ToString` קריא, `with` ו-deconstruction. הוא מיועד ל"נתונים" — אובייקטים שמזוהים לפי התוכן שלהם ולא לפי הזהות.
-
-<div dir="ltr">
+A `record` is a class for which the compiler automatically writes: a constructor, properties, **value-based** `Equals`/`GetHashCode`, a readable `ToString`, `with` and deconstruction. It is meant for "data" — objects identified by their content rather than by their identity.
 
 ```csharp
-record Person(string Name, int Age);          // positional record — שורה אחת
+record Person(string Name, int Age);          // positional record — one line
 
 var p1 = new Person("Dana", 30);
 var p2 = new Person("Dana", 30);
-Console.WriteLine(p1 == p2);                   // True — שוויון לפי ערך
+Console.WriteLine(p1 == p2);                   // True — value equality
 Console.WriteLine(p1);                         // Person { Name = Dana, Age = 30 }
-var older = p1 with { Age = 31 };              // עותק עם שינוי; p1 לא השתנה
+var older = p1 with { Age = 31 };              // copy with a change; p1 is unchanged
 var (name, age) = older;                       // deconstruction
 ```
 
-</div>
-
 | | `class` | `record` |
 |---|---|---|
-| שוויון | לפי הפניה (אותו אובייקט) | לפי ערך (אותם נתונים) |
-| מיועד ל | ישויות עם זהות ומצב שמשתנה (`BankAccount`, `Order`) | נתונים/ערכים (`Point`, `Money`, DTO, תוצאת שאילתה) |
-| שינוי | properties עם `set` | בדרך כלל immutable, `with` ליצירת עותק |
-| `ToString` | שם הטיפוס (אלא אם דורסים) | כל ה-properties |
+| Equality | By reference (the same object) | By value (the same data) |
+| Intended for | Entities with identity and changing state (`BankAccount`, `Order`) | Data/values (`Point`, `Money`, DTO, query result) |
+| Modification | Properties with `set` | Usually immutable, `with` to create a copy |
+| `ToString` | The type name (unless overridden) | All the properties |
 
-כלל אצבע: אם שני אובייקטים עם אותם נתונים הם "אותו דבר" — record. אם הזהות חשובה (שני חשבונות בנק עם אותה יתרה הם עדיין חשבונות שונים) — class. יש גם `record struct` לטיפוסי ערך.
+Rule of thumb: if two objects with the same data are "the same thing" — record. If identity matters (two bank accounts with the same balance are still different accounts) — class. There is also `record struct` for value types.
 
-## מחזור החיים של אובייקט
+## Object lifecycle
 
-מה קורה בפועל כשכותבים `var acc = new BankAccount("IL-1", "Dana");`? קודם מוקצה זיכרון ב-heap בגודל שמתאים לכל השדות של המחלקה. השדות מקבלים ערכי ברירת מחדל (`0`, `false`, `null`), ואז רצים המאתחלים שכתבתם בשורת ההצהרה (`= [];`, `= "";`), ורק אז גוף הבנאי. בסוף מוחזרת ההפניה ונשמרת ב-`acc`. האובייקט חי כל עוד מישהו מחזיק הפניה אליו; כשאין יותר הפניות, ה-**Garbage Collector** משחרר את הזיכרון בזמן שנוח לו — אין `delete` ב-C#. זו הסיבה שאנחנו לא דואגים לשחרור זיכרון, אבל כן דואגים לשחרור **משאבים** חיצוניים (קבצים, חיבורים) דרך `IDisposable` — על כך במודול 06.
+What actually happens when you write `var acc = new BankAccount("IL-1", "Dana");`? First, memory is allocated on the heap, large enough for all the class's fields. The fields get default values (`0`, `false`, `null`), then the initializers you wrote on the declaration line run (`= [];`, `= "";`), and only then the constructor body. Finally, the reference is returned and stored in `acc`. The object lives as long as someone holds a reference to it; when there are no more references, the **Garbage Collector** frees the memory whenever it sees fit — there is no `delete` in C#. That's why we don't worry about freeing memory, but we do take care of releasing external **resources** (files, connections) via `IDisposable` — more on that in module 06.
 
-חשוב להבין את ההשלכה של "הפניה": אם נעביר את `acc` למתודה והמתודה תקרא `acc.Deposit(100)`, השינוי יראה גם אצל הקורא — יש רק אובייקט אחד. לעומת זאת, `record struct` או `int` שמועברים למתודה מועתקים, והמתודה עובדת על עותק.
+It's important to understand the implication of "reference": if we pass `acc` to a method and the method calls `acc.Deposit(100)`, the caller will see the change too — there is only one object. By contrast, a `record struct` or an `int` passed to a method is copied, and the method works on the copy.
 
-## עוד על `required` מול בנאי
+## More on `required` vs. a constructor
 
-מתי לבחור בנאי ומתי `required`? בנאי מתאים כשיש **לוגיקה** ביצירה — ולידציה, חישוב, רישום — או כשיש מעט פרמטרים חובה. `required` + `init` מתאים לאובייקטים שהם בעיקר "מכולת נתונים" עם הרבה שדות, שבהם object initializer קריא יותר מרשימת פרמטרים ארוכה שקל לבלבל בסדר שלהם. אפשר גם לשלב: בנאי לפרמטרים החיוניים ו-properties עם `init` לכל השאר.
+When should you choose a constructor and when `required`? A constructor fits when there is **logic** at creation — validation, computation, registration — or when there are few mandatory parameters. `required` + `init` fits objects that are mainly "data containers" with many fields, where an object initializer is more readable than a long parameter list whose order is easy to mix up. You can also combine them: a constructor for the essential parameters and `init` properties for everything else.
 
-## טעויות נפוצות
+## Common mistakes
 
-- **שדות ציבוריים** (`public int Age;`) — מאבדים שליטה. תמיד property.
-- **בנאי שלא מאמת** ואז מתודות שבודקות `if (Name == null)` בכל מקום. אמתו פעם אחת, בכניסה.
-- **`set` ציבורי על כל דבר** — אם ערך לא אמור להשתנות אחרי היצירה, `{ get; }` או `init`.
-- **בלבול בין `static` למופע** — `Count++` בתוך מתודה סטטית לא יכול לגשת ל-`this`; ומתודת מופע יכולה לגשת ל-static, לא להפך.
-- **record עם `set` ציבורי** — מאבד את היתרון (immutability + hash יציב). אם צריך שינוי — class.
-- **בנאי שעושה עבודה כבדה** (קריאה לרשת, DB) — בנאי צריך להיות מהיר וצפוי. עבודה כבדה — במתודה נפרדת או factory.
-- **`==` בין מחלקות** כשמתכוונים לתוכן — עבור `class` זו השוואת הפניות. או record, או `Equals` דרוס (מודול 03).
+- **Public fields** (`public int Age;`) — you lose control. Always use a property.
+- **A constructor that doesn't validate**, followed by methods that check `if (Name == null)` everywhere. Validate once, at the entry point.
+- **A public `set` on everything** — if a value shouldn't change after creation, use `{ get; }` or `init`.
+- **Confusing `static` and instance** — `Count++` inside a static method can't access `this`; an instance method can access static members, but not the other way around.
+- **A record with a public `set`** — loses the benefit (immutability + a stable hash). If you need mutation — use a class.
+- **A constructor that does heavy work** (network call, DB) — a constructor should be fast and predictable. Heavy work belongs in a separate method or a factory.
+- **`==` between classes** when you mean content — for a `class` this compares references. Use a record, or an overridden `Equals` (module 03).
 
-## לסיכום
+## Summary
 
-- מחלקה = תבנית; אובייקט = מופע עם מצב משלו. `new` מפעיל בנאי שאחראי להביא את האובייקט למצב תקין.
-- Properties במקום שדות ציבוריים: `{ get; set; }`, `{ get; private set; }`, `{ get; init; }`, `required`, ו-computed (`=>`).
-- בנאים: overloads עם `: this(...)`, ו-primary constructors כשהבנאי טריוויאלי.
-- `static` — שייך למחלקה: קבועים, מונים, factory methods.
-- `record` לנתונים (שוויון לפי ערך, `with`), `class` לישויות עם זהות.
+- Class = template; object = instance with its own state. `new` invokes a constructor that is responsible for bringing the object into a valid state.
+- Properties instead of public fields: `{ get; set; }`, `{ get; private set; }`, `{ get; init; }`, `required`, and computed (`=>`).
+- Constructors: overloads with `: this(...)`, and primary constructors when the constructor is trivial.
+- `static` — belongs to the class: constants, counters, factory methods.
+- `record` for data (value equality, `with`), `class` for entities with identity.
 
-## קריאה נוספת
+## Further reading
 
 - [Classes, structs, and records](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/classes)
 - [Properties](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/properties)
@@ -247,5 +217,3 @@ var (name, age) = older;                       // deconstruction
 - [Primary constructors](https://learn.microsoft.com/dotnet/csharp/whats-new/tutorials/primary-constructors)
 - [Records](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/record)
 - [required modifier](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/required)
-
-</div>

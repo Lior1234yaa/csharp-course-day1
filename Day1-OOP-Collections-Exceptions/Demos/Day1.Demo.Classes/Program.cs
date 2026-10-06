@@ -1,11 +1,11 @@
 // =====================================================================
-// Day1.Demo.Classes — מחלקות, אובייקטים, בנאים ומאפיינים
-// מה הדמו מראה:
-//   * class עם שדות פרטיים ו-properties (auto, init, required, computed)
-//   * בנאים: overloads, שרשור עם this(...), primary constructor (C# 12)
-//   * object initializer, static members (מונה מופעים, factory)
-//   * record מול class — שוויון לפי ערך, with-expression, deconstruction
-// הרצה:  dotnet run
+// Day1.Demo.Classes — classes, objects, constructors and properties
+// What the demo shows:
+//   * a class with private fields and properties (auto, init, required, computed)
+//   * constructors: overloads, chaining with this(...), primary constructor (C# 12)
+//   * object initializer, static members (instance counter, factory)
+//   * record vs class — value equality, with-expression, deconstruction
+// Run:  dotnet run
 // =====================================================================
 
 Console.WriteLine("=== 1. Basic class with properties ===");
@@ -14,7 +14,7 @@ acc.Deposit(500);
 acc.Deposit(250);
 Console.WriteLine(acc);
 Console.WriteLine($"Owner={acc.Owner}, Balance={acc.Balance}, IsEmpty={acc.IsEmpty}");
-// acc.Balance = 1000;  // שגיאת קומפילציה: ה-setter פרטי — עקרון האנקפסולציה
+// acc.Balance = 1000;  // compile error: the setter is private — the encapsulation principle
 
 Console.WriteLine("\n=== 2. Multiple constructors and chaining ===");
 var acc2 = new BankAccount("IL-002", "Yossi", initialDeposit: 1_000);
@@ -23,7 +23,7 @@ Console.WriteLine($"Total accounts created: {BankAccount.Count}");
 
 Console.WriteLine("\n=== 3. required + init + object initializer ===");
 var product = new Product { Sku = "P-100", Name = "Keyboard", Price = 149.9m };
-// product.Sku = "X";  // שגיאה: init-only — ניתן לקבוע רק בזמן היצירה
+// product.Sku = "X";  // error: init-only — can only be set at creation time
 Console.WriteLine($"{product.Name} ({product.Sku}) costs {product.Price:C}, with VAT {product.PriceWithVat:C}");
 
 Console.WriteLine("\n=== 4. Primary constructor (C# 12) ===");
@@ -45,7 +45,7 @@ var r1 = new PersonRecord("Dana", 30);
 var r2 = new PersonRecord("Dana", 30);
 Console.WriteLine($"record: r1 == r2 ? {r1 == r2}   (value equality)");
 Console.WriteLine($"record ToString: {r1}");
-var r3 = r1 with { Age = 31 };           // עותק עם שינוי
+var r3 = r1 with { Age = 31 };           // a copy with a change
 Console.WriteLine($"with: {r3}");
 var (pname, page) = r3;                   // deconstruction
 Console.WriteLine($"deconstructed: {pname} / {page}");
@@ -53,14 +53,14 @@ Console.WriteLine($"deconstructed: {pname} / {page}");
 // ------------------------------------------------------------------
 class BankAccount
 {
-    // שדה פרטי — המצב הפנימי
+    // private field — the internal state
     private readonly List<decimal> _transactions = [];
 
     public static int Count { get; private set; }
 
-    public string Id { get; }                  // read-only property (נקבע בבנאי)
-    public string Owner { get; set; }          // auto-property רגיל
-    public decimal Balance { get; private set; } // קריאה ציבורית, כתיבה פרטית
+    public string Id { get; }                  // read-only property (set in the constructor)
+    public string Owner { get; set; }          // regular auto-property
+    public decimal Balance { get; private set; } // public read, private write
     public bool IsEmpty => Balance == 0;      // computed property (expression-bodied)
 
     public BankAccount(string id, string owner)
@@ -70,7 +70,7 @@ class BankAccount
         Count++;
     }
 
-    // overload שמשרשר לבנאי הראשי
+    // an overload that chains to the main constructor
     public BankAccount(string id, string owner, decimal initialDeposit) : this(id, owner)
     {
         Deposit(initialDeposit);
@@ -88,8 +88,8 @@ class BankAccount
 
 class Product
 {
-    public const int MaxNameLength = 50;              // קבוע — static מובנה
-    public required string Sku { get; init; }         // חובה באתחול, ולא ניתן לשנות אחר כך
+    public const int MaxNameLength = 50;              // constant — implicitly static
+    public required string Sku { get; init; }         // required at initialization, can't be changed afterwards
     public required string Name { get; init; }
     public decimal Price { get; set; }
     public decimal PriceWithVat => Price * 1.18m;     // computed
@@ -97,7 +97,7 @@ class Product
     public static Product CreateFreeSample(string name) => new() { Sku = "FREE", Name = name, Price = 0 };
 }
 
-// primary constructor: הפרמטרים זמינים בכל גוף המחלקה
+// primary constructor: the parameters are available throughout the class body
 class TemperatureSensor(string location, double initial)
 {
     private readonly List<double> _readings = [initial];
